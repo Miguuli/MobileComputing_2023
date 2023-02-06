@@ -74,7 +74,7 @@ fun LoginScreen(app: Application,
                     else{
                         val access_granted = viewModel.authorize(username, password)
                         println("access_granted: $access_granted")
-                        if(access_granted) navController.navigate("payment")
+                        if(access_granted) navController.navigate("start")
                     } },
                 enabled = true,
                 modifier = Modifier.fillMaxWidth(),
