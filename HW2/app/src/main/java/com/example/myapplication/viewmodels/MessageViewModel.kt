@@ -1,8 +1,8 @@
 package com.example.myapplication.viewmodels
 
 import android.app.Application
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.data.entity.Message
@@ -50,6 +50,16 @@ class MessageViewModel(private val app: Application,
     fun removeMessage(index: Int) {
         _messages.removeAt(index)
     }
+    fun updateEnable(flag: Boolean){
+        enabled = flag
+    }
+
+    fun updateContent(message_content: String, index: Int) {
+        _messages[index] = message_content
+    }
+
+    var enabled by  mutableStateOf(false)
+        private set
 
     private val _messages = DummyMessage().message_list.toMutableStateList()
     val messages: SnapshotStateList<String>
