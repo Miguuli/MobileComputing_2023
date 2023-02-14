@@ -19,7 +19,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.theme.*
 import com.example.myapplication.viewmodels.MessageViewModel
 import com.example.myapplication.viewmodels.MessageViewModelFactory
-import com.google.accompanist.insets.systemBarsPadding
 
 @Composable
 fun MessageScreen(app: Application,
@@ -28,22 +27,13 @@ fun MessageScreen(app: Application,
                       factory = MessageViewModelFactory(app)
                   )) {
     Surface {
-      Column(
-          modifier = Modifier
-              .fillMaxSize()
-              .systemBarsPadding()
-      ) {
+      Column( modifier = screen_modifier) {
           MyTopAppBar(onBackClick = onBackPress,
               onAddClick = { viewModel.addMessage("NewMessage") }
           )
-          LazyColumn(
-              contentPadding = PaddingValues(
-                  horizontal = 10.dp,
-                  vertical = 8.dp
-              ), modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(10.dp)
-          ) {
+          LazyColumn(contentPadding = message_column_padding,
+              modifier = message_column_modifier) {
+
               val iterator = viewModel.messages.listIterator()
 
               iterator.withIndex().forEach {
@@ -52,7 +42,7 @@ fun MessageScreen(app: Application,
                       val content = it.value
 
                       MessageRow(message_content = content,
-                          onDeleteClick = { viewModel.removeMessage(index = index) },
+                          onDeleteClick = { viewModel.removeMessage(index = it.index) },
                           onUpdate = { viewModel.updateEnable(it) },
                           onUpdateContent = { viewModel.updateContent(message_content = content, index = index)},
                           flag = viewModel.enabled
@@ -63,6 +53,15 @@ fun MessageScreen(app: Application,
           }
       }
   }
+}
+
+@Composable
+fun MyTopAppBar(onBackClick: () -> Unit, onAddClick: () -> Unit){
+    TopAppBar {
+        BackIcon(onBackClick = onBackClick)
+        Text(text = "Messages")
+        AddIcon(onAddClick = onAddClick)
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -113,13 +112,4 @@ fun MyTextField(flag: Boolean, message_content: String,
             .focusRequester(focusRequester)
             .size(width = 200.dp, height = 75.dp)
     )
-}
-
-@Composable
-fun MyTopAppBar(onBackClick: () -> Unit, onAddClick: () -> Unit){
-    TopAppBar {
-        BackIcon(onBackClick = onBackClick)
-        Text(text = "Messages")
-        AddIcon(onAddClick = onAddClick)
-    }
 }

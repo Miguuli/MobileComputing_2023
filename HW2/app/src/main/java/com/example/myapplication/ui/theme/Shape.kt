@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.theme
 
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -8,12 +8,26 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.insets.systemBarsPadding
 
 val Shapes = Shapes(
     small = RoundedCornerShape(4.dp),
     medium = RoundedCornerShape(4.dp),
     large = RoundedCornerShape(0.dp)
 )
+
+val message_column_padding = PaddingValues(
+    horizontal = 10.dp,
+    vertical = 8.dp
+)
+
+val message_column_modifier = Modifier
+    .fillMaxWidth()
+    .padding(10.dp)
+
+val screen_modifier = Modifier
+    .fillMaxSize()
+    .systemBarsPadding()
 @Composable
 fun AccountIcon(){
     Icon(
@@ -68,3 +82,4 @@ fun BackIcon(onBackClick: () -> Unit){
         )
     }
 }
+
