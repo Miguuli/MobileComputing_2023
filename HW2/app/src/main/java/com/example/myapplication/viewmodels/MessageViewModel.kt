@@ -22,8 +22,6 @@ import kotlin.random.Random
 class MessageViewModel(private val app: Application,
                        private val messageRepository: MessageRepository = Graph.messageRepository)
     : ViewModel(){
-    private val my_job = SupervisorJob()
-    private val my_scope = CoroutineScope(my_job + Dispatchers.Main)
     private val _selected_message = MutableStateFlow<Message?>(null)
 
     private val _state = MutableStateFlow(MessageStore())
@@ -32,40 +30,35 @@ class MessageViewModel(private val app: Application,
     var enabled by  mutableStateOf(false)
         private set
 
-    fun editMessage(uID: Long) {
+    fun editMessage(uid: Long, message_content: String) {
         viewModelScope.launch {
-            messageRepository.editMessage(
-                    message = messageRepository.getMessageWithId(uID)!!
-            )
+            val message = Message(uid = uid, content = message_content)
+            messageRepository.editMessage(message = message)
+            println("edited_message: $message_content")
         }
     }
+
+
     fun addMessage(message_content: String){
         viewModelScope.launch {
             val message = Message(uid = Random.nextLong(), content = message_content)
             messageRepository.addMessage(message = message)
         }
     }
-    fun removeMessage(uid: Long) {
-        /*
-        viewModelScope.launch {
-            messageRepository.editMessage(
-                message = messageRepository.getMessageWithId(uID)!!
-            )
-        }
 
-         */
+    fun removeMessage(uid: Long) {
+        viewModelScope.launch {
+            messageRepository.deleteMessage(uid = uid)
+        }
     }
+
     fun updateEnable(flag: Boolean){
         enabled = flag
     }
 
-    fun updateContent(message_content: String, uid: Long) {
-        //_messages[index] = message_content
-    }
-
     fun addDummyDataToDb(){
         val dummy_message_list = listOf(
-            Message(uid = 1, content = "Hello1"),
+            Message(uid = Random.nextLong(), content = "Hello1"),
             Message(uid = 2, content = "Hello2"),
             Message(uid = 3, content = "Hello3"),
             Message(uid = 4, content = "Hello4"),
@@ -98,7 +91,7 @@ class MessageViewModel(private val app: Application,
                 )
             }.collect{_state.value = it }
         }
-        addDummyDataToDb()
+        //addDummyDataToDb()
     }
 }
 

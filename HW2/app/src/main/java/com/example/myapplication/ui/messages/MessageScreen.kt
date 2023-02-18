@@ -3,6 +3,9 @@ package com.example.myapplication.ui.messages
 import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -28,35 +31,38 @@ fun MessageScreen(app: Application,
                   )) {
     val viewState by viewModel.state.collectAsState()
 
-    val selectedCategory = viewState.selected_message
+    val selectedMessage = viewState.selected_message
 
     Surface {
-      Column( modifier = screen_modifier) {
-          MyTopAppBar(onBackClick = onBackPress,
+        Column( modifier = screen_modifier) {
+            MyTopAppBar(onBackClick = onBackPress,
               onAddClick = { viewModel.addMessage("NewMessage") }
-          )
-          LazyColumn(contentPadding = message_column_padding,
-              modifier = message_column_modifier) {
-              val iterator = viewState.messages.sortedBy { it.uid }
+            )
+            LazyColumn(contentPadding = message_column_padding,
+                modifier = message_column_modifier) {
 
-              iterator.forEach {
-                  item{
-                      val uid = it.uid
-                      val content = it.content
+                val messages = viewState.messages.sortedBy { message->message.uid }
 
-                      MessageRow(message_content = content!!,
-                          onDeleteClick = { viewModel.removeMessage(uid = it.uid) },
-                          onUpdate = { viewModel.updateEnable(it) },
-                          onUpdateContent = { viewModel.updateContent(message_content = content, uid = uid)},
-                          flag = viewModel.enabled
-                      )
-                      Spacer(modifier = Modifier.height(5.dp))
-                  }
-              }
-          }
-      }
-  }
+                items(items = messages, key = { message->message.uid }) {
+                        message->
+                    val uid = message.uid
+                    val content = message.content
+
+                    MessageRow(message_content = content!!,
+                        onDeleteClick = { viewModel.removeMessage(uid = message.uid) },
+                        onUpdate = { viewModel.updateEnable(it) },
+                        onUpdateContent = {
+                            viewModel.editMessage(message_content = it, uid = uid)
+                        },
+                        flag = viewModel.enabled
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                }
+            }
+        }
+    }
 }
+
 
 @Composable
 fun MyTopAppBar(onBackClick: () -> Unit, onAddClick: () -> Unit){
@@ -75,16 +81,24 @@ fun MessageRow(message_content: String, onDeleteClick: () -> Unit,
 
     val (focusRequester) = FocusRequester.createRefs()
 
-    Row {
-        AccountIcon()
-        MyTextField(flag = flag, message_content = message_content,
-            onUpdate = onUpdate,
-            onUpdateContent = onUpdateContent, focusRequester = focusRequester)
-        DeleteIcon(onDeleteClick = onDeleteClick)
-        EditIcon(onClick = {
-            focusRequester.requestFocus()
-            onUpdate(true)
-        })
+    LazyRow {
+        item {
+            AccountIcon()
+        }
+        item {
+            MyTextField(flag = flag, message_content = message_content,
+                onUpdate = onUpdate,
+                onUpdateContent = onUpdateContent, focusRequester = focusRequester)
+        }
+        item {
+            DeleteIcon(onDeleteClick = onDeleteClick)
+        }
+        item {
+            EditIcon(onClick = {
+                focusRequester.requestFocus()
+                onUpdate(true)
+            })
+        }
     }
 }
 
@@ -101,7 +115,7 @@ fun MyTextField(flag: Boolean, message_content: String,
         value = stateful_message_content,
         onValueChange = {
             stateful_message_content = it
-            onUpdateContent(it)},
+            onUpdateContent(stateful_message_content) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Ascii,
             imeAction = ImeAction.Done),

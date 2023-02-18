@@ -8,7 +8,7 @@ import kotlin.random.Random
 @Entity
 data class Message(
     @PrimaryKey val uid: Long,
-    @ColumnInfo(name = "content") val content: String?,
+    @ColumnInfo(name = "content") var content: String?,
     @ColumnInfo(name = "location_x") val locationX: Long = Random.nextLong(),
     @ColumnInfo(name = "location_y") val locationY: Float = Random.nextFloat(),
     @ColumnInfo(name= "reminder_time") val reminderTime: Long = Random.nextLong(),

@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 
 class MessageRepository(private val messageDao: MessageDao){
     fun messages(): Flow<List<Message>> = messageDao.messages()
-    fun getMessageWithId(uID: Long): Message? = messageDao.getMessageWithId(uID)
 
     private val my_job = SupervisorJob()
     private val my_scope = CoroutineScope(my_job + Dispatchers.IO)
@@ -35,9 +34,25 @@ class MessageRepository(private val messageDao: MessageDao){
     fun editMessage(message: Message): Long {
         var ret = 0L
         my_scope.launch {
-            when (val local = messageDao.getMessageWithId(message.uid)) {
-                null -> messageDao.update(message)
-                else -> ret = local.uid
+            ret = when(messageDao.getMessageWithId(message.uid)) {
+                null-> ret
+                else-> {
+                    messageDao.update(message)
+                    1
+                }
+            }
+        }
+        return ret
+    }
+
+    fun deleteMessage(uid: Long): Int {
+        var ret = 0
+        my_scope.launch {
+            ret = when (val local = messageDao.getMessageWithId(uid)) {
+                null-> ret
+                else->{
+                    messageDao.delete(local)
+                }
             }
         }
         return ret
