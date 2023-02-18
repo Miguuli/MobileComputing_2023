@@ -26,6 +26,10 @@ fun MessageScreen(app: Application,
                   viewModel: MessageViewModel = viewModel(
                       factory = MessageViewModelFactory(app)
                   )) {
+    val viewState by viewModel.state.collectAsState()
+
+    val selectedCategory = viewState.selected_message
+
     Surface {
       Column( modifier = screen_modifier) {
           MyTopAppBar(onBackClick = onBackPress,
@@ -33,18 +37,17 @@ fun MessageScreen(app: Application,
           )
           LazyColumn(contentPadding = message_column_padding,
               modifier = message_column_modifier) {
+              val iterator = viewState.messages.sortedBy { it.uid }
 
-              val iterator = viewModel.messages.listIterator()
-
-              iterator.withIndex().forEach {
+              iterator.forEach {
                   item{
-                      val index = it.index
-                      val content = it.value
+                      val uid = it.uid
+                      val content = it.content
 
-                      MessageRow(message_content = content,
-                          onDeleteClick = { viewModel.removeMessage(index = it.index) },
+                      MessageRow(message_content = content!!,
+                          onDeleteClick = { viewModel.removeMessage(uid = it.uid) },
                           onUpdate = { viewModel.updateEnable(it) },
-                          onUpdateContent = { viewModel.updateContent(message_content = content, index = index)},
+                          onUpdateContent = { viewModel.updateContent(message_content = content, uid = uid)},
                           flag = viewModel.enabled
                       )
                       Spacer(modifier = Modifier.height(5.dp))
