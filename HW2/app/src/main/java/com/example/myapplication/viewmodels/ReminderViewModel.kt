@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
 
@@ -37,10 +38,11 @@ class ReminderViewModel(private val app: Application,
     }
 
 
-    fun addReminder(message_content: String){
+    fun addReminder(message_content: String, reminderTime: String){
         viewModelScope.launch {
-            val reminder = Reminder(uid = Random.nextLong(), content = message_content,
-            creationTime = Date().time)
+            val reminder = Reminder(
+                uid = Random.nextLong(), content = message_content,
+            creationTime = Date().time, reminderTime = reminderTime)
             reminderRepository.addReminder(reminder = reminder)
         }
     }

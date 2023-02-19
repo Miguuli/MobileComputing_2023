@@ -1,12 +1,14 @@
 package com.example.myapplication.ui.theme
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.systemBarsPadding
 
@@ -60,10 +62,8 @@ fun EditIcon(onClick: () -> Unit){
 }
 
 @Composable
-fun AddIcon(onAddClick: () -> Unit){
-    IconButton(
-        onClick = onAddClick
-    ) {
+fun AddIcon(onClick: () -> Unit){
+    FloatingActionButton(onClick = onClick) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = null
@@ -81,5 +81,12 @@ fun BackIcon(onBackClick: () -> Unit){
             contentDescription = null
         )
     }
+}
+
+@Composable
+fun cutOutShape(): Shape {
+    return MaterialTheme.shapes.small.copy(
+        CornerSize(percent = 50)
+    )
 }
 

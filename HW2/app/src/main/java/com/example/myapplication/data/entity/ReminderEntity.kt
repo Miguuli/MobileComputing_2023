@@ -12,7 +12,7 @@ data class Reminder(
     @ColumnInfo(name = "content") var content: String?,
     @ColumnInfo(name = "location_x") val locationX: Long = Random.nextLong(),
     @ColumnInfo(name = "location_y") val locationY: Float = Random.nextFloat(),
-    @ColumnInfo(name= "reminder_time") val reminderTime: Long = Random.nextLong(),
-    @ColumnInfo(name= "creation_time") val creationTime: Long = Date().time,
+    @ColumnInfo(name= "reminder_time") var reminderTime: String = String(),
+    @ColumnInfo(name= "creation_time") var creationTime: Long = Date().time,
     @ColumnInfo(name = "reminder_seen") val reminderSeen: Long = Random.nextLong()
 )
