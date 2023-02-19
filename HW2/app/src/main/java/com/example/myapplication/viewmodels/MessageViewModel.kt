@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.random.Random
 
 class MessageViewModel(private val app: Application,
@@ -41,7 +42,8 @@ class MessageViewModel(private val app: Application,
 
     fun addMessage(message_content: String){
         viewModelScope.launch {
-            val message = Message(uid = Random.nextLong(), content = message_content)
+            val message = Message(uid = Random.nextLong(), content = message_content,
+            creationTime = Date().time)
             messageRepository.addMessage(message = message)
         }
     }
@@ -58,16 +60,16 @@ class MessageViewModel(private val app: Application,
 
     fun addDummyDataToDb(){
         val dummy_message_list = listOf(
-            Message(uid = Random.nextLong(), content = "Hello1"),
-            Message(uid = 2, content = "Hello2"),
-            Message(uid = 3, content = "Hello3"),
-            Message(uid = 4, content = "Hello4"),
-            Message(uid = 5, content = "Hello5"),
-            Message(uid = 6, content = "Hello6"),
-            Message(uid = 7, content = "Hello7"),
-            Message(uid = 8, content = "Hello8"),
-            Message(uid = 9, content = "Hello9"),
-            Message(uid = 10, content = "Hello10")
+            Message(uid = Random.nextLong(), content = "Hello1", creationTime = Date().time),
+            Message(uid = 2, content = "Hello2", creationTime = Date().time),
+            Message(uid = 3, content = "Hello3", creationTime = Date().time),
+            Message(uid = 4, content = "Hello4", creationTime = Date().time),
+            Message(uid = 5, content = "Hello5", creationTime = Date().time),
+            Message(uid = 6, content = "Hello6", creationTime = Date().time),
+            Message(uid = 7, content = "Hello7", creationTime = Date().time),
+            Message(uid = 8, content = "Hello8", creationTime = Date().time),
+            Message(uid = 9, content = "Hello9", creationTime = Date().time),
+            Message(uid = 10, content = "Hello10", creationTime = Date().time)
         )
         viewModelScope.launch {
             dummy_message_list.forEach{
