@@ -23,9 +23,9 @@ fun Start(navController: NavHostController) {
             enabled = true,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
-            onClick = { navController.navigate("message") }
+            onClick = { navController.navigate("reminder") }
         ) {
-            Text("Messages")
+            Text("Reminders")
         }
         Spacer(modifier = Modifier.height(10.dp))
         Button(

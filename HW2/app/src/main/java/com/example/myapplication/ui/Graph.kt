@@ -2,20 +2,20 @@ package com.example.myapplication.ui
 
 import android.content.Context
 import androidx.room.Room
-import com.example.myapplication.data.room.MessageDatabase
-import com.example.myapplication.data.repository.MessageRepository
+import com.example.myapplication.data.room.ReminderDatabase
+import com.example.myapplication.data.repository.ReminderRepository
 
 object Graph {
-    lateinit var messageDatabase: MessageDatabase
+    lateinit var reminderDatabase: ReminderDatabase
 
-    val messageRepository by lazy {
-        MessageRepository(
-            messageDao = messageDatabase.messageDao()
+    val reminderRepository by lazy {
+        ReminderRepository(
+            reminderDao = reminderDatabase.reminderDao()
         )
     }
 
     fun provide(context: Context?){
-        messageDatabase = Room.databaseBuilder(context!!, MessageDatabase::class.java, "myApplicationData.db")
+        reminderDatabase = Room.databaseBuilder(context!!, ReminderDatabase::class.java, "myApplicationData.db")
             .fallbackToDestructiveMigration()
             .enableMultiInstanceInvalidation()
             .build()

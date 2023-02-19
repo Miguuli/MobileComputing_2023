@@ -1,8 +1,8 @@
 package com.example.myapplication.domain
 
-import com.example.myapplication.data.entity.Message
+import com.example.myapplication.data.entity.Reminder
 
-data class MessageStore(
-    val messages: List<Message> = emptyList(),
-    val selected_message: Message? = null
+data class ReminderStore(
+    val reminders: List<Reminder> = emptyList(),
+    val selected_reminder: Reminder? = null
 )

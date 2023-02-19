@@ -7,7 +7,7 @@ import java.util.*
 import kotlin.random.Random
 
 @Entity
-data class Message(
+data class Reminder(
     @PrimaryKey val uid: Long,
     @ColumnInfo(name = "content") var content: String?,
     @ColumnInfo(name = "location_x") val locationX: Long = Random.nextLong(),

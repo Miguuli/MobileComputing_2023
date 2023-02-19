@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.myapplication.MyApplicationState
 import com.example.myapplication.rememberMyApplicationState
 import com.example.myapplication.ui.login.LoginScreen
-import com.example.myapplication.ui.messages.MessageScreen
+import com.example.myapplication.ui.reminders.ReminderScreen
 import com.example.myapplication.ui.start.Start
 
 @Composable
@@ -25,8 +25,8 @@ fun SetupMyApplication(
         composable(route = "start"){
             Start(navController = appState.navController)
         }
-        composable(route = "message"){
-            MessageScreen(app, onBackPress = appState::navigateBack)
+        composable(route = "reminder"){
+            ReminderScreen(app, onBackPress = appState::navigateBack)
         }
     }
 }
