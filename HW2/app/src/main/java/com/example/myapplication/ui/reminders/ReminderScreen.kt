@@ -8,20 +8,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.entity.Reminder
 import com.example.myapplication.ui.theme.*
 import com.example.myapplication.viewmodels.ReminderViewModel
 import com.example.myapplication.viewmodels.ReminderViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReminderScreen(app: Application,
@@ -38,10 +36,7 @@ fun ReminderScreen(app: Application,
             )
             MyLazyColumn(reminders = viewState.reminders,
                 onDeleteClick = { uid-> viewModel.removeReminder(uid = uid)},
-                onUpdate =  { flag-> viewModel.updateEnable(flag = flag)},
-                flag = viewModel.enabled,
-                onEditMessage = { content, uid->
-                    viewModel.editReminder(message_content = content, uid = uid)}
+                onEditMessage = { content, uid-> viewModel.editReminder(uid = uid, message_content = content)}
             )
         }
     }
@@ -50,8 +45,6 @@ fun ReminderScreen(app: Application,
 @Composable
 fun MyLazyColumn(reminders: List<Reminder>,
                  onDeleteClick: (Long) -> Unit,
-                 onUpdate: (Boolean) -> Unit,
-                 flag: Boolean,
                  onEditMessage: (String, Long)->Unit){
 
     LazyColumn(contentPadding = message_column_padding,
@@ -65,9 +58,7 @@ fun MyLazyColumn(reminders: List<Reminder>,
 
             ReminderRow(message_content = message.content!!,
                 onDeleteClick = { onDeleteClick(message.uid) },
-                onUpdate = { onUpdate(it) },
                 onUpdateContent = { onEditMessage(it, message.uid) },
-                flag = flag
             )
             Spacer(modifier = Modifier.height(5.dp))
         }
@@ -83,57 +74,42 @@ fun MyTopAppBar(onBackClick: () -> Unit, onAddClick: () -> Unit){
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReminderRow(message_content: String, onDeleteClick: () -> Unit,
-                onUpdate: (Boolean) -> Unit, flag: Boolean,
                 onUpdateContent: (String) -> Unit) {
 
-    val (focusRequester) = FocusRequester.createRefs()
 
     LazyRow {
         item {
             AccountIcon()
         }
         item {
-            MyTextField(flag = flag, message_content = message_content,
-                onUpdate = onUpdate,
-                onUpdateContent = {onUpdateContent(it)}, focusRequester = focusRequester)
+            MyTextField(message_content = message_content,
+                onUpdateContent = { onUpdateContent(it) }
+            )
         }
-        item {
-            DeleteIcon(onDeleteClick = onDeleteClick)
-        }
-        item {
-            EditIcon(onClick = {
-                focusRequester.requestFocus()
-                onUpdate(true)
-            })
-        }
+        item { DeleteIcon(onDeleteClick = onDeleteClick) }
     }
 }
 
 @Composable
-fun MyTextField(flag: Boolean, message_content: String,
-                onUpdate: (Boolean) -> Unit, onUpdateContent: (String) -> Unit,
-                focusRequester: FocusRequester){
-    var stateful_message_content by remember{ mutableStateOf("" + message_content) }
+fun MyTextField(message_content: String,
+                onUpdateContent: (String) -> Unit){
+    var stateful_message_content by remember{ mutableStateOf(message_content) }
 
     OutlinedTextField(
-        enabled = flag,
         value = stateful_message_content,
-        onValueChange = {
-            stateful_message_content = it
-            onUpdateContent(stateful_message_content) },
+        onValueChange = {stateful_message_content = it},
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Ascii,
             imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
             onDone = {
-                onUpdate(false)
-            }),
+                onUpdateContent(stateful_message_content)
+            }
+        ),
         singleLine = true,
         modifier = Modifier
-            .focusRequester(focusRequester)
             .size(width = 200.dp, height = 75.dp)
     )
 }
