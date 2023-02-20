@@ -100,7 +100,7 @@ fun ReminderEditDialog(msg : String,
 
     if (showDialog) {
         AlertDialog(
-            modifier = Modifier.size(width = 200.dp, height = 200.dp),
+            modifier = Modifier.size(width = 250.dp, height = 240.dp),
             title = {
                 Text(msg)
             },
@@ -140,7 +140,7 @@ fun ReminderEditDialogContent(onDone: (String, String)-> Unit) {
                 ),
                 singleLine = true,
                 modifier = Modifier
-                    .size(width = 100.dp, height = 50.dp)
+                    .size(width = 150.dp, height = 50.dp)
             )
         }
         item{
@@ -160,7 +160,7 @@ fun ReminderEditDialogContent(onDone: (String, String)-> Unit) {
                 ),
                 singleLine = true,
                 modifier = Modifier
-                    .size(width = 100.dp, height = 50.dp)
+                    .size(width = 150.dp, height = 50.dp)
             )
         }
     }
