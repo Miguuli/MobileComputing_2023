@@ -39,7 +39,8 @@ fun ReminderScreen(app: Application,
                         message_content = content
                     )},
                 onDeleteClick = { uid-> viewModel.removeReminder(uid = uid) },
-                onEditReminder = {content, uid-> viewModel.editReminder(uid = uid, message_content = content)}
+                onEditReminder = {time, content, uid->
+                    viewModel.editReminder(time = time, message_content = content, uid = uid)}
             )
         }
     }
@@ -58,7 +59,7 @@ fun MyScaffold(
     reminders: List<Reminder>,
     onAddReminder: (String, String) -> Unit,
     onDeleteClick: (Long) -> Unit,
-    onEditReminder: (String, Long) -> Unit
+    onEditReminder: (String, String, Long) -> Unit
 ){
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
@@ -80,7 +81,35 @@ fun MyScaffold(
     ) {
         MyLazyColumn(reminders = reminders,
             onDeleteClick = { uid-> onDeleteClick(uid) },
-            onEditMessage = { content, uid-> onEditReminder(content, uid) }
+            onEditMessage = { time, content, uid-> onEditReminder(time, content, uid) }
+        )
+    }
+}
+
+/**
+ * Credit: https://www.codexpedia.com/android/android-jetpack-compose-show-alertdialog-on-button-click/
+ */
+@Composable
+fun Alert(msg : String,
+          showDialog: Boolean,
+          onDismiss: () -> Unit,
+          onEditMessage: (String, String) -> Unit) {
+
+    if (showDialog) {
+        AlertDialog(
+            modifier = Modifier.size(width = 200.dp, height = 200.dp),
+            title = {
+                Text(msg)
+            },
+            text = {
+              EditDrawerContent(onDone =  { time, content-> onEditMessage(time, content)})
+            },
+            onDismissRequest = onDismiss,
+            buttons = {
+                TextButton(onClick = onDismiss ) {
+                    Text("Ok")
+                }
+            },
         )
     }
 }
@@ -88,7 +117,7 @@ fun MyScaffold(
 @Composable
 fun MyLazyColumn(reminders: List<Reminder>,
                  onDeleteClick: (Long) -> Unit,
-                 onEditMessage: (String, Long)->Unit){
+                 onEditMessage: (String, String, Long)->Unit){
 
     LazyColumn(contentPadding = message_column_padding,
         modifier = message_column_modifier,
@@ -100,20 +129,20 @@ fun MyLazyColumn(reminders: List<Reminder>,
 
             ReminderRow(
                 message_content = message.content!!,
-                        reminderTime = message.reminderTime,
+                reminderTime = message.reminderTime,
                 onDeleteClick = { onDeleteClick(message.uid) },
-                onUpdateContent =  { onEditMessage(it, message.uid) }
+                onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
             )
             Spacer(modifier = Modifier.height(5.dp))
         }
     }
 }
 
-
 @Composable
 fun ReminderRow(
-    message_content: String, reminderTime: String?, onDeleteClick: () -> Unit,
-    onUpdateContent: (String) -> Unit) {
+    message_content: String, reminderTime: String?,
+    onDeleteClick: () -> Unit,
+    onUpdateContent: (String, String) -> Unit) {
 
     LazyRow {
         item {
@@ -123,6 +152,18 @@ fun ReminderRow(
             )
         }
         item { DeleteIcon(onDeleteClick = onDeleteClick) }
+        item {
+            /**
+             * Credit: https://www.codexpedia.com/android/android-jetpack-compose-show-alertdialog-on-button-click/
+             */
+            val showDialog = remember { mutableStateOf(false) }
+            if (showDialog.value) {
+                Alert(msg = "Edit reminder",
+                    showDialog = showDialog.value,
+                    onDismiss = {showDialog.value = false},
+                onEditMessage = {time, content-> onUpdateContent(time, content)})
+            }
+            EditIcon(onClick = {showDialog.value = true}) }
     }
 }
 
@@ -137,7 +178,9 @@ fun ReminderContent(message_content: String, reminderTime: String?){
 @Composable
 fun DrawerContent(onDone: (String, String)-> Unit){
     var stateful_time_content by remember{ mutableStateOf("") }
+    var stateful_message_content by remember{ mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+
     Text("Set reminder time")
     OutlinedTextField(
         value = stateful_time_content,
@@ -155,7 +198,6 @@ fun DrawerContent(onDone: (String, String)-> Unit){
             .size(width = 150.dp, height = 75.dp)
     )
 
-    var stateful_message_content by remember{ mutableStateOf("") }
     Text("Set task")
     OutlinedTextField(
         value = stateful_message_content,
@@ -173,4 +215,53 @@ fun DrawerContent(onDone: (String, String)-> Unit){
         modifier = Modifier
             .size(width = 150.dp, height = 75.dp)
     )
+}
+
+@Composable
+fun EditDrawerContent(onDone: (String, String)-> Unit) {
+    var stateful_time_content by remember { mutableStateOf("") }
+    var stateful_message_content by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+
+    LazyColumn{
+        item{
+            Text("Set reminder time")
+            OutlinedTextField(
+                value = stateful_time_content,
+                onValueChange = { stateful_time_content = it },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                ),
+                singleLine = true,
+                modifier = Modifier
+                    .size(width = 100.dp, height = 50.dp)
+            )
+        }
+        item{
+            Text("Set task")
+            OutlinedTextField(
+                value = stateful_message_content,
+                onValueChange = { stateful_message_content = it },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        onDone(stateful_time_content, stateful_message_content)
+                    }
+                ),
+                singleLine = true,
+                modifier = Modifier
+                    .size(width = 100.dp, height = 50.dp)
+            )
+        }
+    }
 }

@@ -29,9 +29,9 @@ class ReminderViewModel(private val app: Application,
     var enabled by  mutableStateOf(false)
         private set
 
-    fun editReminder(uid: Long, message_content: String) {
+    fun editReminder(time: String, message_content: String,  uid: Long, ) {
         viewModelScope.launch {
-            val reminder = Reminder(uid = uid, content = message_content)
+            val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
             reminderRepository.editReminder(reminder = reminder)
             println("edited_message: $message_content")
         }
