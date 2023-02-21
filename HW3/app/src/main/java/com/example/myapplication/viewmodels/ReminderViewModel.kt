@@ -56,7 +56,7 @@ class ReminderViewModel(private val app: Application,
                 uid = Random.nextLong(), content = message_content,
             creationTime = Date().time, reminderTime = reminderTime)
             reminderRepository.addReminder(reminder = reminder)
-            setNotification(reminder.reminderTime)
+            setNotification(reminder.reminderTime, reminder.content)
         }
     }
 
@@ -82,7 +82,7 @@ class ReminderViewModel(private val app: Application,
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun setNotification(reminderTime: String) {
+    fun setNotification(reminderTime: String, content: String?) {
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -100,7 +100,7 @@ class ReminderViewModel(private val app: Application,
         workManager.getWorkInfoByIdLiveData(notificationWorker.id)
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    createSuccessNotification()
+                    createSuccessNotification(content)
                 }
             }
     }
@@ -124,12 +124,12 @@ class ReminderViewModel(private val app: Application,
         return time_delta
     }
 
-    private fun createSuccessNotification() {
+    private fun createSuccessNotification(content: String?) {
         val notificationId = 1
         val builder = NotificationCompat.Builder(app, "CHANNEL_ID")
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("Success!")
-            .setContentText("Your countdown completed successfully")
+            .setContentTitle("Reminder!")
+            .setContentText(content!!)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         with(NotificationManagerCompat.from(app)) {
