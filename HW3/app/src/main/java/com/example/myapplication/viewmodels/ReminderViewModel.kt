@@ -56,7 +56,7 @@ class ReminderViewModel(private val app: Application,
                 uid = Random.nextLong(), content = message_content,
             creationTime = Date().time, reminderTime = reminderTime)
             reminderRepository.addReminder(reminder = reminder)
-            setNotification(reminder.reminderTime, reminder.content)
+            setNotifications(reminder.reminderTime, reminder.content)
         }
     }
 
@@ -82,13 +82,23 @@ class ReminderViewModel(private val app: Application,
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun setNotification(reminderTime: String, content: String?) {
+    fun setNotifications(reminderTime: String, content: String?) {
+        val time_delta = reminder_to_delta(reminderTime)
+        val offset_ms = 15*60*1000
+        val time_delta_15_min_offset = time_delta - offset_ms
+
+        queueNotification(0, content!!)
+        queueNotification(time_delta, content)
+        if(time_delta_15_min_offset - Date().time >= 15){
+            queueNotification(time_delta_15_min_offset, content)
+        }
+    }
+
+    private fun queueNotification(time_delta: Long, content: String){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val time_delta = reminder_to_delta(reminderTime)
-
 
         val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(time_delta, TimeUnit.MILLISECONDS)
@@ -104,7 +114,6 @@ class ReminderViewModel(private val app: Application,
                 }
             }
     }
-
     private fun reminder_to_delta(reminderTime: String): Long {
         val remindertime_split = reminderTime.split(".")
         val remindertime_hours = remindertime_split[0].toLong().hours
@@ -188,7 +197,6 @@ class ReminderViewModel(private val app: Application,
                 )
             }.collect{_state.value = it }
         }
-        //addDummyDataToDb()
     }
 }
 
