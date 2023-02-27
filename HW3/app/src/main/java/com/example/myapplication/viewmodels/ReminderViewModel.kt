@@ -73,7 +73,7 @@ class ReminderViewModel(private val app: Application,
     private fun configure_notification() {
         val name = "NotificationChannelName"
         val descriptionText = "NotificationChannelDescriptionText"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val importance = NotificationManager.IMPORTANCE_HIGH
         val channel = NotificationChannel("CHANNEL_ID", name, importance).apply {
             description = descriptionText
         }
@@ -139,7 +139,7 @@ class ReminderViewModel(private val app: Application,
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle("Reminder!")
             .setContentText(content!!)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
 
         with(NotificationManagerCompat.from(app)) {
             //notificationId is unique for each notification that you define
