@@ -3,7 +3,9 @@ package com.example.myapplication.viewmodels
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -16,6 +18,7 @@ import com.example.myapplication.data.entity.Reminder
 import com.example.myapplication.data.repository.ReminderRepository
 import com.example.myapplication.domain.ReminderStore
 import com.example.myapplication.ui.Graph
+import com.example.myapplication.ui.MainActivity
 import com.example.myapplication.util.NotificationWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -140,6 +143,11 @@ class ReminderViewModel(private val app: Application,
             .setContentTitle("Reminder!")
             .setContentText(content!!)
             .setPriority(NotificationCompat.PRIORITY_MAX)
+
+        val intent = PendingIntent.getActivity(app, 0,
+            Intent(app, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+
+        builder.setContentIntent(intent)
 
         with(NotificationManagerCompat.from(app)) {
             //notificationId is unique for each notification that you define
