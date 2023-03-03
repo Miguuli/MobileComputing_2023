@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.theme.*
 import com.example.myapplication.viewmodels.ReminderViewModel
@@ -19,8 +21,9 @@ fun ReminderScreen(app: Application,
 
     Surface {
         Column( modifier = screen_modifier) {
-            MyTopAppBar(onBackClick = onBackPress)
+            MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled, onShowAll = {viewModel.updateEnable(it)})
             ReminderModifyScaffold(reminders = viewState.reminders,
+                enabled = viewModel.enabled,
                 onAddReminder = { time, content->
                     viewModel.addReminder(
                         reminderTime = time,
@@ -35,9 +38,11 @@ fun ReminderScreen(app: Application,
 }
 
 @Composable
-fun MyTopAppBar(onBackClick: () -> Unit){
+fun MyTopAppBar(onBackClick: () -> Unit, enabled: Boolean, onShowAll: (Boolean) -> Unit){
     TopAppBar {
         BackIcon(onBackClick = onBackClick)
         Text(text = "Reminder")
+        Spacer(modifier = Modifier.width(130.dp))
+        ShowAllButton(enabled = enabled, onShowAll = {onShowAll(it)})
     }
 }

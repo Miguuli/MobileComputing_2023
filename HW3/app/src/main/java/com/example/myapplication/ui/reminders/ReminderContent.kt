@@ -22,24 +22,26 @@ import com.example.myapplication.ui.theme.message_column_padding
 
 @Composable
 fun ReminderContentColumn(reminders: List<Reminder>,
+                          enabled: Boolean,
                           onDeleteClick: (Long) -> Unit,
                           onEditMessage: (String, String, Long)->Unit){
 
     LazyColumn(contentPadding = message_column_padding,
         modifier = message_column_modifier,
         verticalArrangement = Arrangement.Center) {
+        if(enabled){
+            items(items = reminders.sortedBy { message->message.creationTime },
+                key = { message->message.creationTime }) {
+                    message->
 
-        items(items = reminders.sortedBy { message->message.creationTime },
-            key = { message->message.creationTime }) {
-                message->
-
-            ReminderRow(
-                message_content = message.content!!,
-                reminderTime = message.reminderTime,
-                onDeleteClick = { onDeleteClick(message.uid) },
-                onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
-            )
-            Spacer(modifier = Modifier.height(5.dp))
+                ReminderRow(
+                    message_content = message.content!!,
+                    reminderTime = message.reminderTime,
+                    onDeleteClick = { onDeleteClick(message.uid) },
+                    onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+            }
         }
     }
 }

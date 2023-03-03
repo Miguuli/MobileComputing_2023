@@ -118,9 +118,18 @@ class ReminderViewModel(private val app: Application,
             }
     }
     private fun reminder_to_delta(reminderTime: String): Long {
-        val remindertime_split = reminderTime.split(".")
-        val remindertime_hours = remindertime_split[0].toLong().hours
-        val remindertime_minutes = remindertime_split[1].toLong().minutes
+        val remindertime_split: List<String>?
+        val remindertime_hours: kotlin.time.Duration?
+        val remindertime_minutes: kotlin.time.Duration?
+
+        if(reminderTime.contains(".")){
+            remindertime_split = reminderTime.split(".")
+            remindertime_hours = remindertime_split[0].toLong().hours
+            remindertime_minutes = remindertime_split[1].toLong().minutes
+        }else{
+            remindertime_hours = reminderTime.toLong().hours
+            remindertime_minutes = 0.minutes
+        }
 
         val custom_time = Date()
         custom_time.hours = remindertime_hours.toInt(DurationUnit.HOURS)
