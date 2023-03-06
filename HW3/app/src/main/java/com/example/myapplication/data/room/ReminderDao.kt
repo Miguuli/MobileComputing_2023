@@ -27,6 +27,9 @@ abstract class ReminderDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun update(entity: Reminder)
 
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun updateAll(entities: Collection<Reminder>)
+
     @Delete
     abstract suspend fun delete(entity: Reminder): Int
 }

@@ -20,19 +20,15 @@ import com.example.myapplication.ui.theme.message_column_padding
 
 @Composable
 fun ReminderContentColumn(reminders: List<Reminder>,
-                          enabled: Boolean,
                           onDeleteClick: (Long) -> Unit,
                           onEditMessage: (String, String, Long)->Unit){
 
     LazyColumn(contentPadding = message_column_padding,
         modifier = message_column_modifier,
         verticalArrangement = Arrangement.Center) {
-       // if(enabled){
+
         val items = reminders.sortedBy { message->message.creationTime }
 
-           // items(items = reminders.sortedBy { message->message.creationTime },
-           //     key = { message->message.creationTime }) {
-           //         message->
         items.forEach{ message->
             if(message.enabled){
                 item(key = message.creationTime){
@@ -48,7 +44,6 @@ fun ReminderContentColumn(reminders: List<Reminder>,
         }
     }
 }
-//}
 
 @Composable
 fun ReminderRow(

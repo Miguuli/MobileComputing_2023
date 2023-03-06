@@ -5,7 +5,7 @@ import com.example.myapplication.data.room.ReminderDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ReminderRepository(private val reminderDao: ReminderDao){
@@ -58,6 +58,21 @@ class ReminderRepository(private val reminderDao: ReminderDao){
         return ret
     }
 
+    fun editAll(enabled: Boolean) {
+
+        my_scope.launch {
+            reminderDao.reminders().collect {reminders_from_db->
+                reminders_from_db.forEach{reminder_from_db->
+                    val reminder = Reminder(uid = reminder_from_db.uid,
+                        content = reminder_from_db.content,
+                        reminderTime = reminder_from_db.reminderTime,
+                        enabled = enabled
+                    )
+                    reminderDao.update(reminder)
+                }
+            }
+        }
+    }
 
     fun deleteReminder(uid: Long): Int {
         var ret = 0

@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReminderModifyScaffold(
     reminders: List<Reminder>,
-    enabled: Boolean,
     onAddReminder: (String, String) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onEditReminder: (String, String, Long) -> Unit
@@ -42,7 +41,6 @@ fun ReminderModifyScaffold(
         bottomBar = { BottomAppBar(cutoutShape = cutOutShape()) { } }
     ) {
         ReminderContentColumn(reminders = reminders,
-            enabled = enabled,
             onDeleteClick = { uid-> onDeleteClick(uid) },
             onEditMessage = { time, content, uid-> onEditReminder(time, content, uid) }
         )

@@ -44,7 +44,7 @@ class ReminderViewModel(private val app: Application,
     var enabled by  mutableStateOf(false)
         private set
 
-    fun editReminder(time: String, message_content: String,  uid: Long, ) {
+    fun editReminder(time: String, message_content: String,  uid: Long) {
         viewModelScope.launch {
             val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
             reminderRepository.editReminder(reminder = reminder)
@@ -61,6 +61,11 @@ class ReminderViewModel(private val app: Application,
         }
     }
 
+    fun editAll(enabled: Boolean){
+        viewModelScope.launch {
+            reminderRepository.editAll(enabled)
+        }
+    }
     fun addReminder(message_content: String, reminderTime: String){
         viewModelScope.launch {
             val reminder = Reminder(
@@ -78,7 +83,8 @@ class ReminderViewModel(private val app: Application,
     }
 
     fun updateEnable(flag: Boolean){
-        enabled = flag
+        //enabled = flag
+        //editAll(flag)
     }
 
     private fun configure_notification() {

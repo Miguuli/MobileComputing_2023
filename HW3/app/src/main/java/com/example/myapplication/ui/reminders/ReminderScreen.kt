@@ -21,9 +21,8 @@ fun ReminderScreen(app: Application,
 
     Surface {
         Column( modifier = screen_modifier) {
-            MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled, onShowAll = {viewModel.updateEnable(it)})
+            MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled)
             ReminderModifyScaffold(reminders = viewState.reminders,
-                enabled = viewModel.enabled,
                 onAddReminder = { time, content->
                     viewModel.addReminder(
                         reminderTime = time,
@@ -38,11 +37,11 @@ fun ReminderScreen(app: Application,
 }
 
 @Composable
-fun MyTopAppBar(onBackClick: () -> Unit, enabled: Boolean, onShowAll: (Boolean) -> Unit){
+fun MyTopAppBar(onBackClick: () -> Unit, enabled: Boolean){
     TopAppBar {
         BackIcon(onBackClick = onBackClick)
         Text(text = "Reminder")
         Spacer(modifier = Modifier.width(130.dp))
-        ShowAllButton(enabled = enabled, onShowAll = {onShowAll(it)})
+        //ShowAllButton(enabled = enabled, onShowAll = {onShowAll(it)})
     }
 }
