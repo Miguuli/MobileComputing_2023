@@ -48,7 +48,7 @@ class ReminderViewModel(private val app: Application,
         viewModelScope.launch {
             val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
             reminderRepository.editReminder(reminder = reminder)
-            setNotifications(reminder.uid, reminder.reminderTime, reminder.content)
+            setEditNotification(reminder.uid, reminder.reminderTime, reminder.content)
             println("edited_message: $message_content")
         }
     }
@@ -79,6 +79,7 @@ class ReminderViewModel(private val app: Application,
     fun removeReminder(uid: Long) {
         viewModelScope.launch {
             reminderRepository.deleteReminder(uid = uid)
+            setRemoveNotification(uid)
         }
     }
 
@@ -112,6 +113,14 @@ class ReminderViewModel(private val app: Application,
         }
     }
 
+    fun setEditNotification(uid: Long, reminderTime: String, content: String?) {
+        queueEditNotification(0, "Edited reminder: $reminderTime", content)
+    }
+
+    fun setRemoveNotification(uid: Long) {
+        queueDeleteNotification(0, "Deleted reminder", uid.toString())
+    }
+
     private fun queueNotification(uid: Long, reminderTime: String, time_delta: Long, content: String, info: String){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
@@ -136,6 +145,46 @@ class ReminderViewModel(private val app: Application,
             }
     }
 
+    fun queueEditNotification(time_delta: Long, info: String, content: String?){
+        val workManager = WorkManager.getInstance(app)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(time_delta, TimeUnit.MILLISECONDS)
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueue(notificationWorker)
+
+        workManager.getWorkInfoByIdLiveData(notificationWorker.id)
+            .observeForever { workInfo ->
+                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    createSuccessNotification(content, info)
+                }
+            }
+    }
+    fun queueDeleteNotification(time_delta: Long, info: String, content: String?){
+        val workManager = WorkManager.getInstance(app)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(time_delta, TimeUnit.MILLISECONDS)
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueue(notificationWorker)
+
+        workManager.getWorkInfoByIdLiveData(notificationWorker.id)
+            .observeForever { workInfo ->
+                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    createSuccessNotification(content, info)
+                }
+            }
+    }
     private fun reminder_to_delta(reminderTime: String): Long {
         val remindertime_split: List<String>?
         val remindertime_hours: kotlin.time.Duration?
