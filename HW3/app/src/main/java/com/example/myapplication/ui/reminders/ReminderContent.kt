@@ -8,9 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.entity.Reminder
@@ -29,22 +27,28 @@ fun ReminderContentColumn(reminders: List<Reminder>,
     LazyColumn(contentPadding = message_column_padding,
         modifier = message_column_modifier,
         verticalArrangement = Arrangement.Center) {
-        if(enabled){
-            items(items = reminders.sortedBy { message->message.creationTime },
-                key = { message->message.creationTime }) {
-                    message->
+       // if(enabled){
+        val items = reminders.sortedBy { message->message.creationTime }
 
-                ReminderRow(
-                    message_content = message.content!!,
-                    reminderTime = message.reminderTime,
-                    onDeleteClick = { onDeleteClick(message.uid) },
-                    onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
-                )
-                Spacer(modifier = Modifier.height(5.dp))
+           // items(items = reminders.sortedBy { message->message.creationTime },
+           //     key = { message->message.creationTime }) {
+           //         message->
+        items.forEach{ message->
+            if(message.enabled){
+                item(key = message.creationTime){
+                    ReminderRow(
+                        message_content = message.content!!,
+                        reminderTime = message.reminderTime,
+                        onDeleteClick = { onDeleteClick(message.uid) },
+                        onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                }
             }
         }
     }
 }
+//}
 
 @Composable
 fun ReminderRow(

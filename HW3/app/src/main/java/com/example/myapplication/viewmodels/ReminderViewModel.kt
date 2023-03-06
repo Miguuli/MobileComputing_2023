@@ -48,11 +48,18 @@ class ReminderViewModel(private val app: Application,
         viewModelScope.launch {
             val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
             reminderRepository.editReminder(reminder = reminder)
-            setNotifications(reminder.reminderTime, reminder.content)
+            setNotifications(reminder.uid, reminder.reminderTime, reminder.content)
             println("edited_message: $message_content")
         }
     }
 
+    fun editReminderVisibility(uid: Long, reminderTime: String, enabled: Boolean, content: String) {
+        viewModelScope.launch {
+            val reminder = Reminder(uid = uid, reminderTime = reminderTime , content = content, enabled = enabled)
+            reminderRepository.editReminderVisibility(reminder = reminder)
+            println("reminder visibility: $enabled")
+        }
+    }
 
     fun addReminder(message_content: String, reminderTime: String){
         viewModelScope.launch {
@@ -60,7 +67,7 @@ class ReminderViewModel(private val app: Application,
                 uid = Random.nextLong(), content = message_content,
             creationTime = Date().time, reminderTime = reminderTime)
             reminderRepository.addReminder(reminder = reminder)
-            setNotifications(reminder.reminderTime, reminder.content)
+            setNotifications(reminder.uid, reminder.reminderTime, reminder.content)
         }
     }
 
@@ -86,19 +93,20 @@ class ReminderViewModel(private val app: Application,
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun setNotifications(reminderTime: String, content: String?) {
+    fun setNotifications(uid: Long, reminderTime: String, content: String?) {
         val time_delta = reminder_to_delta(reminderTime)
         val offset_ms = 15*60*1000
         val time_delta_15_min_offset = time_delta - offset_ms
 
-        queueNotification(0, content!!, "Created reminder: $reminderTime")
-        queueNotification(time_delta, content, "Reminder due now!: $reminderTime")
-        if(Date().time - time_delta >= offset_ms){
-            queueNotification(time_delta_15_min_offset, content, "Reminder due in 15 minutes")
+        queueNotification(uid, reminderTime, 0, content!!, "Created reminder: $reminderTime")
+        queueNotification(uid, reminderTime, time_delta, content, "Reminder due now!: $reminderTime")
+
+        if(time_delta >= offset_ms){
+            queueNotification(uid, reminderTime, time_delta_15_min_offset, content, "Reminder due in 15 minutes")
         }
     }
 
-    private fun queueNotification(time_delta: Long, content: String, info: String){
+    private fun queueNotification(uid: Long, reminderTime: String, time_delta: Long, content: String, info: String){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -114,10 +122,14 @@ class ReminderViewModel(private val app: Application,
         workManager.getWorkInfoByIdLiveData(notificationWorker.id)
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    if(info.contains("Reminder due now")){
+                        editReminderVisibility(uid, reminderTime, true, content)
+                    }
                     createSuccessNotification(content, info)
                 }
             }
     }
+
     private fun reminder_to_delta(reminderTime: String): Long {
         val remindertime_split: List<String>?
         val remindertime_hours: kotlin.time.Duration?

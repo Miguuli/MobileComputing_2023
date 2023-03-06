@@ -14,5 +14,6 @@ data class Reminder(
     @ColumnInfo(name = "location_y") val locationY: Float = Random.nextFloat(),
     @ColumnInfo(name= "reminder_time") var reminderTime: String = String(),
     @ColumnInfo(name= "creation_time") var creationTime: Long = Date().time,
-    @ColumnInfo(name = "reminder_seen") val reminderSeen: Long = Random.nextLong()
+    @ColumnInfo(name = "reminder_seen") val reminderSeen: Long = Random.nextLong(),
+    @ColumnInfo(name = "enabled") var enabled: Boolean = false
 )

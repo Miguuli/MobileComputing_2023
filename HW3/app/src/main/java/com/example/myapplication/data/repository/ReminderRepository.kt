@@ -44,6 +44,20 @@ class ReminderRepository(private val reminderDao: ReminderDao){
         }
         return ret
     }
+    fun editReminderVisibility(reminder: Reminder): Long {
+        var ret = 0L
+        my_scope.launch {
+            ret = when(reminderDao.getReminderWithId(reminder.uid)) {
+                null-> ret
+                else-> {
+                    reminderDao.update(reminder)
+                    1
+                }
+            }
+        }
+        return ret
+    }
+
 
     fun deleteReminder(uid: Long): Int {
         var ret = 0
