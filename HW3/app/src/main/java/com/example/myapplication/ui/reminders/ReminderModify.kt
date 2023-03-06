@@ -112,7 +112,7 @@ fun ReminderEditDialog(msg : String,
             onDismissRequest = onDismiss,
             buttons = {
                 TextButton(onClick = onDismiss ) {
-                    Text("Ok")
+                    Text("Dismiss")
                 }
             },
         )
