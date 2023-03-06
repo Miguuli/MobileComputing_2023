@@ -6,6 +6,11 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Parcel
+import android.provider.MediaStore.Audio
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -25,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -94,6 +100,10 @@ class ReminderViewModel(private val app: Application,
         val importance = NotificationManager.IMPORTANCE_HIGH
         val channel = NotificationChannel("CHANNEL_ID", name, importance).apply {
             description = descriptionText
+            enableLights(true)
+            enableVibration(true)
+            setSound(RingtoneManager.getActualDefaultRingtoneUri(app, RingtoneManager.TYPE_ALARM),
+            audioAttributes)
         }
         val notificationManager: NotificationManager =
             app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -165,6 +175,7 @@ class ReminderViewModel(private val app: Application,
                 }
             }
     }
+
     fun queueDeleteNotification(time_delta: Long, info: String, content: String?){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
@@ -185,6 +196,7 @@ class ReminderViewModel(private val app: Application,
                 }
             }
     }
+
     private fun reminder_to_delta(reminderTime: String): Long {
         val remindertime_split: List<String>?
         val remindertime_hours: kotlin.time.Duration?
@@ -219,6 +231,10 @@ class ReminderViewModel(private val app: Application,
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle(info)
             .setContentText(content!!)
+            .setVibrate(longArrayOf(500,500,500,500,500))
+            .setSound(
+                RingtoneManager.getActualDefaultRingtoneUri(app, RingtoneManager.TYPE_ALARM)
+            )
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
         val intent = PendingIntent.getActivity(app, 0,
