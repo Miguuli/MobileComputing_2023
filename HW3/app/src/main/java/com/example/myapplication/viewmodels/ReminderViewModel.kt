@@ -102,7 +102,7 @@ class ReminderViewModel(private val app: Application,
             description = descriptionText
             enableLights(true)
             enableVibration(true)
-            setSound(RingtoneManager.getActualDefaultRingtoneUri(app, RingtoneManager.TYPE_ALARM),
+            setSound(Uri.parse("android.resource://"+ app.packageName + "/" + "raw/wakey_wakey"),
             audioAttributes)
         }
         val notificationManager: NotificationManager =
@@ -232,9 +232,7 @@ class ReminderViewModel(private val app: Application,
             .setContentTitle(info)
             .setContentText(content!!)
             .setVibrate(longArrayOf(500,500,500,500,500))
-            .setSound(
-                RingtoneManager.getActualDefaultRingtoneUri(app, RingtoneManager.TYPE_ALARM)
-            )
+            //.setSound(Uri.parse("android.resource://"+ app.packageName + "/" + "raw/chime_short"))
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
         val intent = PendingIntent.getActivity(app, 0,
