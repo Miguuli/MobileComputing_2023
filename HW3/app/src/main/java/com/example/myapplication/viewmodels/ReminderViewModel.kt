@@ -48,6 +48,7 @@ class ReminderViewModel(private val app: Application,
         viewModelScope.launch {
             val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
             reminderRepository.editReminder(reminder = reminder)
+            setNotifications(reminder.reminderTime, reminder.content)
             println("edited_message: $message_content")
         }
     }
@@ -90,14 +91,14 @@ class ReminderViewModel(private val app: Application,
         val offset_ms = 15*60*1000
         val time_delta_15_min_offset = time_delta - offset_ms
 
-        queueNotification(0, content!!)
-        queueNotification(time_delta, content)
-        if(time_delta_15_min_offset - Date().time >= 15){
-            queueNotification(time_delta_15_min_offset, content)
+        queueNotification(0, content!!, "Created reminder: $reminderTime")
+        queueNotification(time_delta, content, "Reminder due now!: $reminderTime")
+        if(Date().time - time_delta >= offset_ms){
+            queueNotification(time_delta_15_min_offset, content, "Reminder due in 15 minutes")
         }
     }
 
-    private fun queueNotification(time_delta: Long, content: String){
+    private fun queueNotification(time_delta: Long, content: String, info: String){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -113,7 +114,7 @@ class ReminderViewModel(private val app: Application,
         workManager.getWorkInfoByIdLiveData(notificationWorker.id)
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    createSuccessNotification(content)
+                    createSuccessNotification(content, info)
                 }
             }
     }
@@ -145,11 +146,11 @@ class ReminderViewModel(private val app: Application,
         return time_delta
     }
 
-    private fun createSuccessNotification(content: String?) {
+    private fun createSuccessNotification(content: String?, info: String) {
         val notificationId = 1
         val builder = NotificationCompat.Builder(app, "CHANNEL_ID")
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("Reminder!")
+            .setContentTitle(info)
             .setContentText(content!!)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
