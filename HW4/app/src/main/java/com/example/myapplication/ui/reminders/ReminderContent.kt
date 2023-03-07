@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +24,7 @@ import com.example.myapplication.ui.theme.message_column_padding
 
 @Composable
 fun ReminderContentColumn(reminders: List<Reminder>,
+                          onMapNavigate: (Float, Float) -> Unit,
                           onDeleteClick: (Long) -> Unit,
                           onEditMessage: (String, String, Long)->Unit){
 
@@ -35,6 +40,7 @@ fun ReminderContentColumn(reminders: List<Reminder>,
                     ReminderRow(
                         message_content = message.content!!,
                         reminderTime = message.reminderTime,
+                        onMapNavigate = {onMapNavigate(message.locationX, message.locationY)},
                         onDeleteClick = { onDeleteClick(message.uid) },
                         onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
                     )
@@ -48,6 +54,7 @@ fun ReminderContentColumn(reminders: List<Reminder>,
 @Composable
 fun ReminderRow(
     message_content: String, reminderTime: String?,
+    onMapNavigate: () -> Unit,
     onDeleteClick: () -> Unit,
     onUpdateContent: (String, String) -> Unit) {
 
@@ -71,7 +78,13 @@ fun ReminderRow(
                     onDismiss = {showDialog.value = false},
                     onEditMessage = {time, content-> onUpdateContent(time, content)})
             }
-            EditIcon(onClick = {showDialog.value = true}) }
+            EditIcon(onClick = {showDialog.value = true})
+        }
+        item{
+            Button(onClick = onMapNavigate) {
+                Icon(imageVector = Icons.Filled.LocationOn, contentDescription = null)
+            }
+        }
     }
 }
 

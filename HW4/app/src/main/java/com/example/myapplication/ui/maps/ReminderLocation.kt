@@ -28,7 +28,7 @@ fun ReminderLocation(navController: NavController) {
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(location.latitude, location.longitude),
-                    10f
+                    15f
                 )
             )
             setMapLongClick(map, navController)

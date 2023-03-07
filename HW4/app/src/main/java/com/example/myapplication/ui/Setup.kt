@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.myapplication.MyApplicationState
 import com.example.myapplication.rememberMyApplicationState
 import com.example.myapplication.ui.login.LoginScreen
+import com.example.myapplication.ui.maps.ReminderLocation
 import com.example.myapplication.ui.reminders.ReminderScreen
 import com.example.myapplication.ui.start.Start
 
@@ -26,7 +27,10 @@ fun SetupMyApplication(
             Start(navController = appState.navController)
         }
         composable(route = "reminder"){
-            ReminderScreen(app, onBackPress = appState::navigateBack)
+            ReminderScreen(app, navController = appState.navController, onBackPress = appState::navigateBack)
+        }
+        composable(route = "map"){
+            ReminderLocation(navController = appState.navController)
         }
     }
 }
