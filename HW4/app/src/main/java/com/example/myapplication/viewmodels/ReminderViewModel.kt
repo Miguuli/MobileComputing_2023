@@ -80,6 +80,7 @@ class ReminderViewModel(private val app: Application,
     }
     fun addReminder(location: String, message_content: String, reminderTime: String){
         viewModelScope.launch {
+            if(reminderTime.isEmpty()) return@launch
             if (location.contains("Work")) {
                 println("location: $location")
                 val reminder = Reminder(

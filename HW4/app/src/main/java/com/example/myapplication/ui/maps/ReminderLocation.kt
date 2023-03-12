@@ -21,12 +21,10 @@ import java.util.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReminderLocation(app: Application, navController: NavController,
-                     viewModel: ReminderViewModel = viewModel(
-                         factory = ReminderViewModelFactory(app))
+fun ReminderLocation(navController: NavController,
+                     locationX: String,
+                     locationY: String
 ) {
-    val viewState by viewModel.state.collectAsState()
-
     val mapView: MapView = rememberMapViewWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
@@ -35,13 +33,8 @@ fun ReminderLocation(app: Application, navController: NavController,
             val map = mapView.awaitMap()
             map.uiSettings.isZoomControlsEnabled = true
             map.uiSettings.isScrollGesturesEnabled = true
-            val reminder = viewState.selected_reminder
-            println("selected_reminder locationX: ${reminder!!.locationX!!} " +
-                    "${reminder.locationY!!}" +
-                    "${reminder.reminderTime}"
-            )
 
-            val location = LatLng(reminder.locationX!!, reminder.locationY!!)
+            val location = LatLng(locationX.toDouble(), locationY.toDouble())
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(location.latitude, location.longitude),
@@ -66,7 +59,7 @@ private fun setMapLongClick(
         )
 
         map.addMarker(
-            MarkerOptions().position(latlng).title("Payment location").snippet(snippet)
+            MarkerOptions().position(latlng).title("Reminder location").snippet(snippet)
         ).apply {
             navController.previousBackStackEntry
                 ?.savedStateHandle

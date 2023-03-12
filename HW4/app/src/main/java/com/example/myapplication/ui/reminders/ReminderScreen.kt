@@ -23,14 +23,12 @@ fun ReminderScreen(
     )
 ) {
     val viewState by viewModel.state.collectAsState()
-    class Test: Navigator.Extras{
 
-    }
     Surface {
         Column( modifier = screen_modifier) {
             MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled)
             ReminderModifyScaffold(reminders = viewState.reminders,
-                onMapNavigate = {locationX, locationY->navController.navigate("map")},
+                onMapNavigate = {locationX, locationY->navController.navigate("map/$locationX/$locationY")},
                 onAddReminder = {location,  time, content, ->
                     viewModel.addReminder(
                         location = location,

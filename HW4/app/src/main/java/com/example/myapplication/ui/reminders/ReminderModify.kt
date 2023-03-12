@@ -1,10 +1,14 @@
 package com.example.myapplication.ui.reminders
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -50,13 +54,23 @@ fun ReminderModifyScaffold(
     }
 }
 
+/**
+ * Credit for dropdownmenu: https://www.geeksforgeeks.org/drop-down-menu-in-android-using-jetpack-compose/
+ */
 @Composable
 fun ReminderAddDrawerContent(onDone: (String, String, String)-> Unit){
     var stateful_time_content by remember{ mutableStateOf("") }
     var stateful_message_content by remember{ mutableStateOf("") }
     var stateful_location_content by remember{ mutableStateOf("")}
+    var mExpanded by remember { mutableStateOf(false) }
+    val mOptions = listOf("Home", "Work", "University")
 
     val focusManager = LocalFocusManager.current
+    // Up Icon when expanded and down icon when collapsed
+    val icon = if (mExpanded)
+        Icons.Filled.KeyboardArrowUp
+    else
+        Icons.Filled.KeyboardArrowDown
 
     Text("Set reminder time")
     OutlinedTextField(
@@ -87,29 +101,39 @@ fun ReminderAddDrawerContent(onDone: (String, String, String)-> Unit){
                 focusManager.clearFocus()
                 onDone(stateful_location_content, stateful_time_content, stateful_message_content)
             }
-
         ),
         singleLine = true,
         modifier = Modifier
             .size(width = 150.dp, height = 75.dp)
     )
-    Text("Set location")
-    OutlinedTextField(
-        value = stateful_location_content,
-        onValueChange = {stateful_location_content = it},
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Ascii,
-            imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                focusManager.clearFocus()
-                onDone(stateful_location_content, stateful_time_content, stateful_message_content)
+    Column{
+        Text("Set location")
+        OutlinedTextField(
+            value = stateful_location_content,
+            onValueChange = {stateful_location_content = it},
+            trailingIcon = {
+                Icon(icon,null,
+                    Modifier.clickable { mExpanded = !mExpanded })
+            },
+            singleLine = true,
+            modifier = Modifier
+                .size(width = 150.dp, height = 75.dp)
+        )
+        DropdownMenu(
+            expanded = mExpanded,
+            onDismissRequest = { mExpanded = false }
+        ){
+            mOptions.forEach{ value->
+                DropdownMenuItem(onClick = {
+                    stateful_location_content = value
+                    mExpanded = false
+                    onDone(stateful_location_content, stateful_time_content, stateful_message_content)
+                }) {
+                    Text(value)
+                }
             }
-        ),
-        singleLine = true,
-        modifier = Modifier
-            .size(width = 150.dp, height = 75.dp)
-    )
+        }
+    }
 }
 
 /**
