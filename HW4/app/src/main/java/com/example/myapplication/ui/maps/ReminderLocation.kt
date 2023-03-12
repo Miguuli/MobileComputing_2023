@@ -38,9 +38,10 @@ fun ReminderLocation(navController: NavController,
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(location.latitude, location.longitude),
-                    15f
+                    17f
                 )
             )
+            setCurrentPosMarker(map, locationX, locationY)
             setMapLongClick(map, navController)
         }
     }
@@ -53,7 +54,7 @@ private fun setMapLongClick(
     map.setOnMapLongClickListener { latlng ->
         val snippet = String.format(
             Locale.getDefault(),
-            "Lat: %1$.2f, Lng: %2$.2f",
+            "Lat: %1$.6f, Lng: %2$.6f",
             latlng.latitude,
             latlng.longitude
         )
@@ -66,4 +67,22 @@ private fun setMapLongClick(
                 ?.set("location_data", latlng)
         }
     }
+}
+
+private fun setCurrentPosMarker(
+    map: GoogleMap,
+    locationX: String,
+    locationY: String){
+
+    val latlng = LatLng(locationX.toDouble(), locationY.toDouble())
+    val snippet = String.format(
+        Locale.getDefault(),
+        "Lat: %1$.6f, Lng: %2$.6f",
+        latlng.latitude,
+        latlng.longitude
+    )
+
+    map.addMarker(
+        MarkerOptions().position(latlng).title("Reminder location").snippet(snippet)
+    )
 }

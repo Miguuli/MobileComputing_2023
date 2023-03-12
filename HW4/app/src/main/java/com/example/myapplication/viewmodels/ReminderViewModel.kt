@@ -81,17 +81,40 @@ class ReminderViewModel(private val app: Application,
     fun addReminder(location: String, message_content: String, reminderTime: String){
         viewModelScope.launch {
             if(reminderTime.isEmpty()) return@launch
-            if (location.contains("Work")) {
+            if (location.contains("Home")) {
                 println("location: $location")
                 val reminder = Reminder(
-                    locationX = 65.06,
-                    locationY = 25.44,
+                    locationX = 65.061489,
+                    locationY = 25.485139,
                     uid = Random.nextLong(), content = message_content,
                     creationTime = Date().time, reminderTime = reminderTime
                 )
                 reminderRepository.addReminder(reminder = reminder)
                 setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
-            }else{
+            }
+            else if (location.contains("Work")) {
+                println("location: $location")
+                val reminder = Reminder(
+                    locationX = 65.059150,
+                    locationY = 25.440928,
+                    uid = Random.nextLong(), content = message_content,
+                    creationTime = Date().time, reminderTime = reminderTime
+                )
+                reminderRepository.addReminder(reminder = reminder)
+                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
+            }
+            else if (location.contains("University")) {
+                println("location: $location")
+                val reminder = Reminder(
+                    locationX = 65.059289,
+                    locationY = 25.466833,
+                    uid = Random.nextLong(), content = message_content,
+                    creationTime = Date().time, reminderTime = reminderTime
+                )
+                reminderRepository.addReminder(reminder = reminder)
+                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
+            }
+            else{
                 println("location: $location")
 
                 val reminder = Reminder(
