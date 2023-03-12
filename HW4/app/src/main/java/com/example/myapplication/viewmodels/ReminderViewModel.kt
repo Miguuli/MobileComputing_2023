@@ -1,15 +1,22 @@
 package com.example.myapplication.viewmodels
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
+import android.os.Bundle
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -34,6 +41,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.DurationUnit
 import java.time.*
 
+@SuppressLint("MissingPermission")
 class ReminderViewModel(private val app: Application,
                         private val reminderRepository: ReminderRepository = Graph.reminderRepository)
     : ViewModel(){
@@ -44,7 +52,18 @@ class ReminderViewModel(private val app: Application,
         get() = _state
     var enabled by  mutableStateOf(false)
         private set
+    var locationByGps: Location? = null
 
+    val gpsLocationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            locationByGps = location
+        }
+
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
     fun editReminder(time: String, message_content: String,  uid: Long) {
         viewModelScope.launch {
             val reminder = Reminder(uid = uid, reminderTime = time, content = message_content,
@@ -89,6 +108,7 @@ class ReminderViewModel(private val app: Application,
                     uid = Random.nextLong(), content = message_content,
                     creationTime = Date().time, reminderTime = reminderTime
                 )
+                //setLocationNotification(locationX, locationY)
                 reminderRepository.addReminder(reminder = reminder)
                 setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
             }
@@ -101,10 +121,12 @@ class ReminderViewModel(private val app: Application,
                     creationTime = Date().time, reminderTime = reminderTime
                 )
                 reminderRepository.addReminder(reminder = reminder)
-                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
+
+                setNotifications(reminder.uid, reminder.reminderTime, reminder.content,
+                    reminder.locationX, reminder.locationY)
+                setLocationNotification(reminder.locationX!!, reminder.locationY!!)
             }
             else if (location.contains("University")) {
-                println("location: $location")
                 val reminder = Reminder(
                     locationX = 65.059289,
                     locationY = 25.466833,
@@ -115,8 +137,6 @@ class ReminderViewModel(private val app: Application,
                 setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
             }
             else{
-                println("location: $location")
-
                 val reminder = Reminder(
                     locationX = 0.0,
                     locationY = 0.0,
@@ -135,6 +155,17 @@ class ReminderViewModel(private val app: Application,
         }
     }
 
+    fun getDistanceToDestination(locationX: Double, locationY: Double): Float {
+        val results: FloatArray = floatArrayOf(elements = FloatArray(3))
+
+        Location.distanceBetween(
+            locationByGps!!.latitude, locationByGps!!.longitude,
+            locationX, locationY,
+            results
+        )
+        println("Distance from current to reminder location: ${results[0]} meters")
+        return results[0]
+    }
     fun removeReminder(uid: Long) {
         viewModelScope.launch {
             reminderRepository.deleteReminder(uid = uid)
@@ -205,6 +236,32 @@ class ReminderViewModel(private val app: Application,
 
     fun setRemoveNotification(uid: Long) {
         queueDeleteNotification(0, "Deleted reminder", uid.toString())
+    }
+
+    fun setLocationNotification(locationX: Double, locationY: Double) {
+        queueLocationNotification(0,
+            "Distance to destination", getDistanceToDestination(locationX, locationY).toString())
+    }
+
+    private fun queueLocationNotification(time_delta: Long, info: String, content: String) {
+        val workManager = WorkManager.getInstance(app)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(time_delta, TimeUnit.MILLISECONDS)
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueue(notificationWorker)
+
+        workManager.getWorkInfoByIdLiveData(notificationWorker.id)
+            .observeForever { workInfo ->
+                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    createSuccessNotification(content, info)
+                }
+            }
     }
 
     private fun queueNotification(
@@ -345,6 +402,17 @@ class ReminderViewModel(private val app: Application,
     }
 
     init {
+        val locationManager = app.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+        if (hasGps) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                5000,
+                0F,
+                gpsLocationListener
+            )
+        }
         configure_notification()
         viewModelScope.launch{
             combine(
