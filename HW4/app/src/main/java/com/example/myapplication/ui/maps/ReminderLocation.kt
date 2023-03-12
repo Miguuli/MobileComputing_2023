@@ -1,10 +1,16 @@
 package com.example.myapplication.ui.maps
 
+import android.app.Application
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplication.util.rememberMapViewWithLifecycle
+import com.example.myapplication.viewmodels.ReminderViewModel
+import com.example.myapplication.viewmodels.ReminderViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -15,7 +21,12 @@ import java.util.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReminderLocation(navController: NavController) {
+fun ReminderLocation(app: Application, navController: NavController,
+                     viewModel: ReminderViewModel = viewModel(
+                         factory = ReminderViewModelFactory(app))
+) {
+    val viewState by viewModel.state.collectAsState()
+
     val mapView: MapView = rememberMapViewWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
@@ -24,7 +35,13 @@ fun ReminderLocation(navController: NavController) {
             val map = mapView.awaitMap()
             map.uiSettings.isZoomControlsEnabled = true
             map.uiSettings.isScrollGesturesEnabled = true
-            val location = LatLng(65.06, 25.47)
+            val reminder = viewState.selected_reminder
+            println("selected_reminder locationX: ${reminder!!.locationX!!} " +
+                    "${reminder.locationY!!}" +
+                    "${reminder.reminderTime}"
+            )
+
+            val location = LatLng(reminder.locationX!!, reminder.locationY!!)
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(location.latitude, location.longitude),

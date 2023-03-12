@@ -6,11 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Parcel
-import android.provider.MediaStore.Audio
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -30,7 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -52,16 +47,27 @@ class ReminderViewModel(private val app: Application,
 
     fun editReminder(time: String, message_content: String,  uid: Long) {
         viewModelScope.launch {
-            val reminder = Reminder(uid = uid, reminderTime = time, content = message_content)
+            val reminder = Reminder(uid = uid, reminderTime = time, content = message_content,
+                    locationX = 0.0,
+                locationY = 0.0)
             reminderRepository.editReminder(reminder = reminder)
             setEditNotification(reminder.uid, reminder.reminderTime, reminder.content)
             println("edited_message: $message_content")
         }
     }
 
-    fun editReminderVisibility(uid: Long, reminderTime: String, enabled: Boolean, content: String) {
+    fun editReminderVisibility(
+        uid: Long,
+        reminderTime: String,
+        enabled: Boolean,
+        content: String,
+        locationX: Double?,
+        locationY: Double?
+    ) {
         viewModelScope.launch {
-            val reminder = Reminder(uid = uid, reminderTime = reminderTime , content = content, enabled = enabled)
+            val reminder = Reminder(uid = uid, reminderTime = reminderTime , content = content, enabled = enabled,
+                locationX = locationX,
+                locationY = locationY)
             reminderRepository.editReminderVisibility(reminder = reminder)
             println("reminder visibility: $enabled")
         }
@@ -72,13 +78,36 @@ class ReminderViewModel(private val app: Application,
             reminderRepository.editAll(enabled)
         }
     }
-    fun addReminder(message_content: String, reminderTime: String){
+    fun addReminder(location: String, message_content: String, reminderTime: String){
         viewModelScope.launch {
-            val reminder = Reminder(
-                uid = Random.nextLong(), content = message_content,
-            creationTime = Date().time, reminderTime = reminderTime)
-            reminderRepository.addReminder(reminder = reminder)
-            setNotifications(reminder.uid, reminder.reminderTime, reminder.content)
+            if (location.contains("Work")) {
+                println("location: $location")
+                val reminder = Reminder(
+                    locationX = 65.06,
+                    locationY = 25.44,
+                    uid = Random.nextLong(), content = message_content,
+                    creationTime = Date().time, reminderTime = reminderTime
+                )
+                reminderRepository.addReminder(reminder = reminder)
+                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
+            }else{
+                println("location: $location")
+
+                val reminder = Reminder(
+                    locationX = 0.0,
+                    locationY = 0.0,
+                    uid = Random.nextLong(), content = message_content,
+                    creationTime = Date().time, reminderTime = reminderTime
+                )
+                reminderRepository.addReminder(reminder = reminder)
+                setNotifications(
+                    reminder.uid,
+                    reminder.reminderTime,
+                    reminder.content,
+                    reminder.locationX,
+                    reminder.locationY
+                )
+            }
         }
     }
 
@@ -110,16 +139,39 @@ class ReminderViewModel(private val app: Application,
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun setNotifications(uid: Long, reminderTime: String, content: String?) {
+    fun setNotifications(
+        uid: Long,
+        reminderTime: String,
+        content: String?,
+        locationX: Double?,
+        locationY: Double?
+    ) {
         val time_delta = reminder_to_delta(reminderTime)
         val offset_ms = 15*60*1000
         val time_delta_15_min_offset = time_delta - offset_ms
 
-        queueNotification(uid, reminderTime, 0, content!!, "Created reminder: $reminderTime")
-        queueNotification(uid, reminderTime, time_delta, content, "Reminder due now!: $reminderTime")
+        queueNotification(uid, reminderTime, 0, content!!, "Created reminder: $reminderTime",
+            locationX, locationY)
+        queueNotification(
+            uid,
+            reminderTime,
+            time_delta,
+            content,
+            "Reminder due now!: $reminderTime",
+            locationX,
+            locationY
+        )
 
         if(time_delta >= offset_ms){
-            queueNotification(uid, reminderTime, time_delta_15_min_offset, content, "Reminder due in 15 minutes")
+            queueNotification(
+                uid,
+                reminderTime,
+                time_delta_15_min_offset,
+                content,
+                "Reminder due in 15 minutes",
+                locationX,
+                locationY
+            )
         }
     }
 
@@ -131,7 +183,15 @@ class ReminderViewModel(private val app: Application,
         queueDeleteNotification(0, "Deleted reminder", uid.toString())
     }
 
-    private fun queueNotification(uid: Long, reminderTime: String, time_delta: Long, content: String, info: String){
+    private fun queueNotification(
+        uid: Long,
+        reminderTime: String,
+        time_delta: Long,
+        content: String,
+        info: String,
+        locationX: Double?,
+        locationY: Double?
+    ){
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -148,7 +208,7 @@ class ReminderViewModel(private val app: Application,
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                     if(info.contains("Reminder due now")){
-                        editReminderVisibility(uid, reminderTime, true, content)
+                        editReminderVisibility(uid, reminderTime, true, content, locationX, locationY)
                     }
                     createSuccessNotification(content, info)
                 }
@@ -257,26 +317,6 @@ class ReminderViewModel(private val app: Application,
         with(NotificationManagerCompat.from(app)) {
             //notificationId is unique for each notification that you define
             notify(notificationId, builder.build())
-        }
-    }
-
-    fun addDummyDataToDb(){
-        val dummy_reminder_list = listOf(
-            Reminder(uid = Random.nextLong(), content = "Hello1", creationTime = Date().time),
-            Reminder(uid = 2, content = "Hello2", creationTime = Date().time),
-            Reminder(uid = 3, content = "Hello3", creationTime = Date().time),
-            Reminder(uid = 4, content = "Hello4", creationTime = Date().time),
-            Reminder(uid = 5, content = "Hello5", creationTime = Date().time),
-            Reminder(uid = 6, content = "Hello6", creationTime = Date().time),
-            Reminder(uid = 7, content = "Hello7", creationTime = Date().time),
-            Reminder(uid = 8, content = "Hello8", creationTime = Date().time),
-            Reminder(uid = 9, content = "Hello9", creationTime = Date().time),
-            Reminder(uid = 10, content = "Hello10", creationTime = Date().time)
-        )
-        viewModelScope.launch {
-            dummy_reminder_list.forEach{
-                    reminder-> reminderRepository.addReminder(reminder)
-            }
         }
     }
 

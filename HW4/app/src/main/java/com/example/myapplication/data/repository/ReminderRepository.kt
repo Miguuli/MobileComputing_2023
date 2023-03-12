@@ -63,7 +63,10 @@ class ReminderRepository(private val reminderDao: ReminderDao){
         my_scope.launch {
             reminderDao.reminders().collect {reminders_from_db->
                 reminders_from_db.forEach{reminder_from_db->
-                    val reminder = Reminder(uid = reminder_from_db.uid,
+                    val reminder = Reminder(
+                        locationX = 0.0,
+                        locationY = 0.0,
+                        uid = reminder_from_db.uid,
                         content = reminder_from_db.content,
                         reminderTime = reminder_from_db.reminderTime,
                         enabled = enabled

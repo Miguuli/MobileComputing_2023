@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReminderModifyScaffold(
     reminders: List<Reminder>,
-    onMapNavigate: (Float, Float)-> Unit,
-    onAddReminder: (String, String) -> Unit,
+    onMapNavigate: (Double, Double)-> Unit,
+    onAddReminder: (String, String, String) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onEditReminder: (String, String, Long) -> Unit
 ){
@@ -28,7 +28,8 @@ fun ReminderModifyScaffold(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        drawerContent = { ReminderAddDrawerContent { time, content -> onAddReminder(time, content) } },
+        drawerContent = { ReminderAddDrawerContent { location, time, content ->
+            onAddReminder(location, time, content) } },
         floatingActionButton = {
             AddIcon(onClick = {
                 scope.launch{
@@ -50,9 +51,11 @@ fun ReminderModifyScaffold(
 }
 
 @Composable
-fun ReminderAddDrawerContent(onDone: (String, String)-> Unit){
+fun ReminderAddDrawerContent(onDone: (String, String, String)-> Unit){
     var stateful_time_content by remember{ mutableStateOf("") }
     var stateful_message_content by remember{ mutableStateOf("") }
+    var stateful_location_content by remember{ mutableStateOf("")}
+
     val focusManager = LocalFocusManager.current
 
     Text("Set reminder time")
@@ -82,7 +85,25 @@ fun ReminderAddDrawerContent(onDone: (String, String)-> Unit){
         keyboardActions = KeyboardActions(
             onDone = {
                 focusManager.clearFocus()
-                onDone(stateful_time_content, stateful_message_content)
+                onDone(stateful_location_content, stateful_time_content, stateful_message_content)
+            }
+
+        ),
+        singleLine = true,
+        modifier = Modifier
+            .size(width = 150.dp, height = 75.dp)
+    )
+    Text("Set location")
+    OutlinedTextField(
+        value = stateful_location_content,
+        onValueChange = {stateful_location_content = it},
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Ascii,
+            imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+                onDone(stateful_location_content, stateful_time_content, stateful_message_content)
             }
         ),
         singleLine = true,

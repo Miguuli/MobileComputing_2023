@@ -21,16 +21,16 @@ fun SetupMyApplication(
         startDestination = "login"
     ) {
         composable(route = "login"){
-            LoginScreen(app, navController = appState.navController)
+            LoginScreen(app = app, navController = appState.navController)
         }
         composable(route = "start"){
             Start(navController = appState.navController)
         }
         composable(route = "reminder"){
-            ReminderScreen(app, navController = appState.navController, onBackPress = appState::navigateBack)
+            ReminderScreen(app = app, navController = appState.navController, onBackPress = appState::navigateBack)
         }
         composable(route = "map"){
-            ReminderLocation(navController = appState.navController)
+            ReminderLocation(app = app, navController = appState.navController)
         }
     }
 }
