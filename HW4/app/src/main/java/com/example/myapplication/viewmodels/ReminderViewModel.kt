@@ -12,6 +12,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -44,6 +45,13 @@ class ReminderViewModel(private val app: Application,
                         private val reminderRepository: ReminderRepository = Graph.reminderRepository)
     : ViewModel(){
     private val _selected_reminder = MutableStateFlow<Reminder?>(null)
+    lateinit var tts : TextToSpeech
+    var ttsInitListener: tts_init_listener? = null
+    inner class tts_init_listener: TextToSpeech.OnInitListener{
+        override fun onInit(status: Int) {
+            println("status")
+        }
+    }
 
     private val _state = MutableStateFlow(ReminderStore())
     val state: StateFlow<ReminderStore>
@@ -230,6 +238,7 @@ class ReminderViewModel(private val app: Application,
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                     editReminderVisibility(uid, reminderTime, true, content, locationX, locationY)
+                    tts.speak("$info.$content", TextToSpeech.QUEUE_ADD, Bundle.EMPTY, "message")
                     createSuccessNotification(content, info)
                 }
             }
@@ -373,6 +382,12 @@ class ReminderViewModel(private val app: Application,
     }
 
     init {
+        ttsInitListener = tts_init_listener()
+        tts = TextToSpeech( app.applicationContext, ttsInitListener)
+
+        tts.setSpeechRate(1.0f)
+        tts.setPitch(1.0f)
+
         val locationManager = app.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
