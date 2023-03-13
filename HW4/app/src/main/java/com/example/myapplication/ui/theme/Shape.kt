@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.insets.systemBarsPadding
@@ -86,11 +85,11 @@ fun BackIcon(onBackClick: () -> Unit){
     }
 }
 @Composable
-fun ShowAllButton(enabled: Boolean, onShowAll: (Boolean) -> Unit){
+fun NearbyLocations(onShowAll:() -> Unit){
     Button(
-        onClick = {if(!enabled)onShowAll(true) else onShowAll(false)}
+        onClick = onShowAll
     ) {
-        Text(text = "Show all reminders", fontSize = 14.sp)
+        Text(text = "Explore", fontSize = 10.sp)
     }
 }
 @Composable

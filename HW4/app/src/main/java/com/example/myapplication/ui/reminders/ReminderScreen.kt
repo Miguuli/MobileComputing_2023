@@ -26,7 +26,12 @@ fun ReminderScreen(
 
     Surface {
         Column( modifier = screen_modifier) {
-            MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled)
+            MyTopAppBar(onBackClick = onBackPress, onNearbyLocations = {
+                val content = "reference_point"
+                val locationX = 65.012818
+                val locationY = 25.469826
+                navController.navigate("map/$content/$locationX/$locationY")
+            })
             ReminderModifyScaffold(reminders = viewState.reminders,
                 onMapNavigate = {content, locationX, locationY->
                     navController.navigate("map/$content/$locationX/$locationY")},
@@ -45,11 +50,11 @@ fun ReminderScreen(
 }
 
 @Composable
-fun MyTopAppBar(onBackClick: () -> Unit, enabled: Boolean){
+fun MyTopAppBar(onBackClick: () -> Unit, onNearbyLocations: () -> Unit){
     TopAppBar {
         BackIcon(onBackClick = onBackClick)
         Text(text = "Reminder")
         Spacer(modifier = Modifier.width(130.dp))
-        //ShowAllButton(enabled = enabled, onShowAll = {onShowAll(it)})
+        NearbyLocations(onShowAll = onNearbyLocations)
     }
 }
