@@ -2,10 +2,8 @@ package com.example.myapplication.ui
 
 import android.app.Application
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.example.myapplication.MyApplicationState
 import com.example.myapplication.rememberMyApplicationState
 import com.example.myapplication.ui.login.LoginScreen
@@ -31,8 +29,9 @@ fun SetupMyApplication(
         composable(route = "reminder"){
             ReminderScreen(app = app, navController = appState.navController, onBackPress = appState::navigateBack)
         }
-        composable(route = "map/{locationX}/{locationY}"){backStackEntry->
-            ReminderLocation(navController = appState.navController,
+        composable(route = "map/{content}/{locationX}/{locationY}"){backStackEntry->
+            ReminderLocation(app = app, navController = appState.navController,
+                content = backStackEntry.arguments!!.getString("content"),
                 locationX = backStackEntry.arguments!!.getString("locationX")!!,
                 locationY = backStackEntry.arguments!!.getString("locationY")!!)
         }

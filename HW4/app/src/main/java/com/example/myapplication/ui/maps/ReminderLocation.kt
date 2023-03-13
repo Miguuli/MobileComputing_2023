@@ -1,14 +1,15 @@
 package com.example.myapplication.ui.maps
 
 import android.app.Application
+import android.location.Location
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import android.location.Location
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.data.entity.Reminder
 import com.example.myapplication.util.rememberMapViewWithLifecycle
 import com.example.myapplication.viewmodels.ReminderViewModel
 import com.example.myapplication.viewmodels.ReminderViewModelFactory
@@ -22,12 +23,17 @@ import java.util.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReminderLocation(navController: NavController,
-                     locationX: String,
-                     locationY: String
+fun ReminderLocation(
+    app: Application,
+    navController: NavController,
+    locationX: String,
+    locationY: String,
+    viewModel: ReminderViewModel = viewModel(factory = ReminderViewModelFactory(app)),
+    content: String?
 ) {
     val mapView: MapView = rememberMapViewWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
+    val viewState by viewModel.state.collectAsState()
 
     AndroidView({mapView}) {
         coroutineScope.launch {
@@ -42,15 +48,16 @@ fun ReminderLocation(navController: NavController,
                     17f
                 )
             )
-            setCurrentPosMarker(map, locationX, locationY)
-            setMapLongClick(map, navController)
+            setCurrentPosMarker(map, content!!, locationX, locationY)
+            setMapLongClick(map, navController, viewState.reminders)
         }
     }
 }
 
 private fun setMapLongClick(
     map: GoogleMap,
-    navController: NavController
+    navController: NavController,
+    reminders: List<Reminder>
 ) {
     map.setOnMapLongClickListener { latlng ->
         val snippet = String.format(
@@ -59,7 +66,6 @@ private fun setMapLongClick(
             latlng.latitude,
             latlng.longitude
         )
-
         map.addMarker(
             MarkerOptions().position(latlng).title("Reminder location").snippet(snippet)
         ).apply {
@@ -67,11 +73,27 @@ private fun setMapLongClick(
                 ?.savedStateHandle
                 ?.set("location_data", latlng)
         }
+
+        reminders.forEach{reminder->
+            if(getDistanceToDestination(latlng.latitude, latlng.longitude,
+                    reminder.locationX!!, reminder.locationY!!)< 5000){
+                val newLatLng = LatLng(reminder.locationX!!, reminder.locationY!!)
+
+                map.addMarker(
+                    MarkerOptions().position(newLatLng).title(reminder.content).snippet(snippet)
+                ).apply {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("location_data", latlng)
+                }
+            }
+        }
     }
 }
 
 private fun setCurrentPosMarker(
     map: GoogleMap,
+    content: String,
     locationX: String,
     locationY: String){
 
@@ -84,6 +106,18 @@ private fun setCurrentPosMarker(
     )
 
     map.addMarker(
-        MarkerOptions().position(latlng).title("Reminder location").snippet(snippet)
+        MarkerOptions().position(latlng).title(content).snippet(snippet)
     )
+}
+fun getDistanceToDestination(startLocationX: Double, startLocationY: Double,
+endLocationX: Double, endLocationY: Double): Float {
+    val results: FloatArray = floatArrayOf(elements = FloatArray(3))
+
+    Location.distanceBetween(
+       startLocationX, startLocationY,
+        endLocationX, endLocationY,
+        results
+    )
+    println("Distance from current to reminder location: ${results[0]} meters")
+    return results[0]
 }

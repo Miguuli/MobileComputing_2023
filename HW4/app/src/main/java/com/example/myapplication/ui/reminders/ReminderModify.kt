@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReminderModifyScaffold(
     reminders: List<Reminder>,
-    onMapNavigate: (Double, Double)-> Unit,
+    onMapNavigate: (String, Double, Double)-> Unit,
     onAddReminder: (String, String, String) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onEditReminder: (String, String, Long) -> Unit
@@ -47,7 +47,8 @@ fun ReminderModifyScaffold(
         bottomBar = { BottomAppBar(cutoutShape = cutOutShape()) { } }
     ) {
         ReminderContentColumn(reminders = reminders,
-            onMapNavigate = {locationX, locationY->onMapNavigate(locationX, locationY)},
+            onMapNavigate = {content, locationX, locationY->
+                onMapNavigate(content, locationX, locationY)},
             onDeleteClick = { uid-> onDeleteClick(uid) },
             onEditMessage = { time, content, uid-> onEditReminder(time, content, uid) }
         )

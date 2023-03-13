@@ -24,7 +24,7 @@ import com.example.myapplication.ui.theme.message_column_padding
 
 @Composable
 fun ReminderContentColumn(reminders: List<Reminder>,
-                          onMapNavigate: (Double, Double) -> Unit,
+                          onMapNavigate: (String, Double, Double) -> Unit,
                           onDeleteClick: (Long) -> Unit,
                           onEditMessage: (String, String, Long)->Unit){
 
@@ -40,7 +40,7 @@ fun ReminderContentColumn(reminders: List<Reminder>,
                     ReminderRow(
                         message_content = message.content!!,
                         reminderTime = message.reminderTime,
-                        onMapNavigate = {onMapNavigate(message.locationX!!, message.locationY!!)},
+                        onMapNavigate = {onMapNavigate(message.content!!, message.locationX!!, message.locationY!!)},
                         onDeleteClick = { onDeleteClick(message.uid) },
                         onUpdateContent =  { time, content->onEditMessage(time, content, message.uid) }
                     )

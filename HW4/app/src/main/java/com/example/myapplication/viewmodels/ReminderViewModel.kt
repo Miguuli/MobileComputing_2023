@@ -15,8 +15,6 @@ import android.os.Bundle
 import androidx.compose.runtime.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -92,67 +90,50 @@ class ReminderViewModel(private val app: Application,
         }
     }
 
-    fun editAll(enabled: Boolean){
-        viewModelScope.launch {
-            reminderRepository.editAll(enabled)
-        }
-    }
     fun addReminder(location: String, message_content: String, reminderTime: String){
         viewModelScope.launch {
             if(reminderTime.isEmpty()) return@launch
-            if (location.contains("Home")) {
-                println("location: $location")
-                val reminder = Reminder(
-                    locationX = 65.061489,
-                    locationY = 25.485139,
-                    uid = Random.nextLong(), content = message_content,
-                    creationTime = Date().time, reminderTime = reminderTime
-                )
-                //setLocationNotification(locationX, locationY)
-                reminderRepository.addReminder(reminder = reminder)
-                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
-            }
-            else if (location.contains("Work")) {
-                println("location: $location")
-                val reminder = Reminder(
-                    locationX = 65.059150,
-                    locationY = 25.440928,
-                    uid = Random.nextLong(), content = message_content,
-                    creationTime = Date().time, reminderTime = reminderTime
-                )
-                reminderRepository.addReminder(reminder = reminder)
 
-                setNotifications(reminder.uid, reminder.reminderTime, reminder.content,
-                    reminder.locationX, reminder.locationY)
-                setLocationNotification(reminder.locationX!!, reminder.locationY!!)
-            }
-            else if (location.contains("University")) {
-                val reminder = Reminder(
-                    locationX = 65.059289,
-                    locationY = 25.466833,
-                    uid = Random.nextLong(), content = message_content,
-                    creationTime = Date().time, reminderTime = reminderTime
-                )
-                reminderRepository.addReminder(reminder = reminder)
-                setNotifications(reminder.uid, reminder.reminderTime, reminder.content, reminder.locationX, reminder.locationY)
-            }
-            else{
-                val reminder = Reminder(
-                    locationX = 0.0,
-                    locationY = 0.0,
-                    uid = Random.nextLong(), content = message_content,
-                    creationTime = Date().time, reminderTime = reminderTime
-                )
-                reminderRepository.addReminder(reminder = reminder)
-                setNotifications(
-                    reminder.uid,
-                    reminder.reminderTime,
-                    reminder.content,
-                    reminder.locationX,
-                    reminder.locationY
-                )
-            }
+            val destination_locationX = getDestinationLocationX(location)
+            val destination_locationY = getDestinationLocationY(location)
+
+            println("location: $location")
+            val reminder = Reminder(
+                locationX = destination_locationX,
+                locationY = destination_locationY,
+                uid = Random.nextLong(), content = message_content,
+                creationTime = Date().time, reminderTime = reminderTime
+            )
+            reminderRepository.addReminder(reminder = reminder)
+            setNotifications(reminder.uid, reminder.reminderTime, reminder.content,
+                reminder.locationX, reminder.locationY)
         }
+    }
+
+    fun getDestinationLocationX(location: String): Double{
+        if (location.contains("Home")) {
+            return 65.061489
+        }
+        else if(location.contains("Work")) {
+            return 65.059196
+        }
+        else if(location.contains("University")) {
+            return 65.059289
+        }
+        return 0.0
+    }
+
+    fun getDestinationLocationY(location: String): Double{
+        if (location.contains("Home")) {
+            return 25.485139
+        }
+        else if(location.contains("Work")) {
+            return 25.441067
+        }
+        else if(location.contains("University")) {
+            return 25.466833
+        }
+        return 0.0
     }
 
     fun getDistanceToDestination(locationX: Double, locationY: Double): Float {
@@ -166,16 +147,12 @@ class ReminderViewModel(private val app: Application,
         println("Distance from current to reminder location: ${results[0]} meters")
         return results[0]
     }
+
     fun removeReminder(uid: Long) {
         viewModelScope.launch {
             reminderRepository.deleteReminder(uid = uid)
             setRemoveNotification(uid)
         }
-    }
-
-    fun updateEnable(flag: Boolean){
-        //enabled = flag
-        //editAll(flag)
     }
 
     private fun configure_notification() {
@@ -195,38 +172,26 @@ class ReminderViewModel(private val app: Application,
     }
 
     fun setNotifications(
-        uid: Long,
-        reminderTime: String,
-        content: String?,
-        locationX: Double?,
-        locationY: Double?
+        uid: Long, reminderTime: String, content: String?,
+        locationX: Double?, locationY: Double?
     ) {
+        queueNotification(uid, reminderTime, 0, content!!,
+            "Created reminder: $reminderTime", locationX, locationY)
+        val distance = getDistanceToDestination(locationX!!, locationY!!)
+        if(distance <= 100){
+            setLocationNotification(uid, reminderTime, content,
+                locationX, locationY)
+        }
         val time_delta = reminder_to_delta(reminderTime)
         val offset_ms = 15*60*1000
         val time_delta_15_min_offset = time_delta - offset_ms
 
-        queueNotification(uid, reminderTime, 0, content!!, "Created reminder: $reminderTime",
-            locationX, locationY)
-        queueNotification(
-            uid,
-            reminderTime,
-            time_delta,
-            content,
-            "Reminder due now!: $reminderTime",
-            locationX,
-            locationY
-        )
+        queueNotification(uid, reminderTime, time_delta, content,
+            "Reminder due now!: $reminderTime", locationX, locationY)
 
         if(time_delta >= offset_ms){
-            queueNotification(
-                uid,
-                reminderTime,
-                time_delta_15_min_offset,
-                content,
-                "Reminder due in 15 minutes",
-                locationX,
-                locationY
-            )
+            queueNotification(uid, reminderTime, time_delta_15_min_offset, content,
+                "Reminder due in 15 minutes", locationX, locationY)
         }
     }
 
@@ -238,12 +203,17 @@ class ReminderViewModel(private val app: Application,
         queueDeleteNotification(0, "Deleted reminder", uid.toString())
     }
 
-    fun setLocationNotification(locationX: Double, locationY: Double) {
-        queueLocationNotification(0,
-            "Distance to destination", getDistanceToDestination(locationX, locationY).toString())
+    fun setLocationNotification(uid: Long, reminderTime: String, content: String, locationX: Double, locationY: Double) {
+        queueLocationNotification(uid,5,
+            "Reminder nearby", reminderTime, content, locationX, locationY)
     }
 
-    private fun queueLocationNotification(time_delta: Long, info: String, content: String) {
+    private fun queueLocationNotification(
+        uid: Long, time_delta: Long, info: String,
+        reminderTime: String, content: String,
+        locationX: Double,
+        locationY: Double
+    ) {
         val workManager = WorkManager.getInstance(app)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -259,6 +229,7 @@ class ReminderViewModel(private val app: Application,
         workManager.getWorkInfoByIdLiveData(notificationWorker.id)
             .observeForever { workInfo ->
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    editReminderVisibility(uid, reminderTime, true, content, locationX, locationY)
                     createSuccessNotification(content, info)
                 }
             }

@@ -28,7 +28,8 @@ fun ReminderScreen(
         Column( modifier = screen_modifier) {
             MyTopAppBar(onBackClick = onBackPress, enabled = viewModel.enabled)
             ReminderModifyScaffold(reminders = viewState.reminders,
-                onMapNavigate = {locationX, locationY->navController.navigate("map/$locationX/$locationY")},
+                onMapNavigate = {content, locationX, locationY->
+                    navController.navigate("map/$content/$locationX/$locationY")},
                 onAddReminder = {location,  time, content, ->
                     viewModel.addReminder(
                         location = location,
