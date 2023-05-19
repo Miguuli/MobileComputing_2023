@@ -1,6 +1,8 @@
 package com.example.core.domain.businesslogic.reminder
 
+import android.app.PendingIntent
 import com.example.core.data.repository.ReminderRepository
+import com.example.core.domain.businesslogic.notification.NotificationUseCase
 import com.example.core.model.entity.Reminder
 import com.example.core.model.entity.ReminderStore
 import kotlinx.coroutines.flow.combine
@@ -23,9 +25,9 @@ class GetRemindersUseCase @Inject constructor(
 
 class AddReminderUseCase @Inject constructor(
     private val coroutinecontext: CoroutineContext,
-    private val repository: ReminderRepository
-) {
-    suspend operator fun invoke(reminder: Reminder) = withContext(coroutinecontext){
+    private val repository: ReminderRepository) {
+    suspend operator fun invoke(reminder: Reminder): Long
+    = withContext(coroutinecontext){
         repository.addReminder(reminder)
     }
 }

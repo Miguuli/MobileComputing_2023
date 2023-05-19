@@ -61,4 +61,12 @@ object androidx {
         val javalite = "com.google.protobuf:protobuf-javalite:$version"
         val protoc = "com.google.protobuf:protoc:$version"
     }
+
+    object work {
+        private val version = "1.0.0"
+        private val runtime_version = "2.8.1"
+        val hilt_work = "androidx.hilt:hilt-work:$version"
+        val compiler = "androidx.hilt:hilt-compiler:$version"
+        val runtime = "androidx.work:work-runtime:$runtime_version"
+    }
 }

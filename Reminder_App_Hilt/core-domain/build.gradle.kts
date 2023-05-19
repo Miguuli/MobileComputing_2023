@@ -36,10 +36,14 @@ android {
 
 dependencies {
     implementation(androidx.core.ktx)
+    implementation(androidx.work.hilt_work)
+    implementation(androidx.work.runtime)
     implementation(kotlinx.coroutines.android.android)
     // Hilt for DI
     implementation("com.google.dagger:hilt-android:2.44.2")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
+    kapt(androidx.work.compiler)
+    annotationProcessor(androidx.work.compiler)
     implementation(project(":core-model"))
     implementation(project(":core-data"))
     testImplementation("junit:junit:4.13.2")
