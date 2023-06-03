@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.application")
     id("com.google.dagger.hilt.android")
@@ -45,12 +44,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
-    }
-    packagingOptions {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     namespace = "com.example.myapplication"
 }

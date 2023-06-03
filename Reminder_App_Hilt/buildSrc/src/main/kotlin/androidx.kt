@@ -1,11 +1,11 @@
 object androidx {
     object core {
-        private val version = "1.9.0"
+        private val version = "1.10.1"
         val ktx = "androidx.core:core-ktx:$version"
     }
 
     object compose {
-        private val version = "1.4.1"
+        private val version = "1.4.3"
         object ui {
             val ui = "androidx.compose.ui:ui:$version"
             val preview = "androidx.compose.ui:ui-tooling-preview:$version"
@@ -20,7 +20,7 @@ object androidx {
     }
 
     object lifecycle {
-        private val version = "2.5.1"
+        private val version = "2.5.3"
         val compose = "androidx.lifecycle:lifecycle-viewmodel-compose:$version"
         val runtime = "androidx.lifecycle:lifecycle-runtime-ktx:$version"
     }

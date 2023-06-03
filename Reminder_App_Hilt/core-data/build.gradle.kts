@@ -1,3 +1,5 @@
+import com.google.devtools.ksp.gradle.model.Ksp
+
 plugins {
     id("com.android.library")
     id("com.google.dagger.hilt.android")
@@ -11,7 +13,6 @@ android {
 
     defaultConfig {
         minSdk = sdk.min
-        targetSdk = sdk.target
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -44,7 +45,6 @@ dependencies {
     // Hilt for DI
     implementation("com.google.dagger:hilt-android:2.46.1")
     kapt("com.google.dagger:hilt-android-compiler:2.46.1")
-
     // Coroutines
     implementation(kotlinx.coroutines.android.android)
     implementation(kotlinx.coroutines.core.core)

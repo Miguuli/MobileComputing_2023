@@ -1,9 +1,9 @@
-import com.google.protobuf.gradle.*
 plugins {
     id("com.android.library")
     id("com.google.dagger.hilt.android")
     kotlin("android")
     kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -12,7 +12,6 @@ android {
 
     defaultConfig {
         minSdk = sdk.min
-        targetSdk = sdk.target
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -41,7 +40,7 @@ dependencies {
     implementation(androidx.room.ktx)
     implementation(androidx.room.runtime)
     implementation(project(mapOf("path" to ":core-model")))
-    kapt("androidx.room:room-compiler:2.5.1")
+    ksp("androidx.room:room-compiler:2.5.1")
 
     // Coroutines
     implementation(kotlinx.coroutines.android.android)
