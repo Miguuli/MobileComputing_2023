@@ -41,14 +41,14 @@ dependencies {
     implementation(androidx.room.ktx)
     implementation(androidx.room.runtime)
     implementation(project(mapOf("path" to ":core-model")))
-    kapt("androidx.room:room-compiler:2.5.0")
+    kapt("androidx.room:room-compiler:2.5.1")
 
     // Coroutines
     implementation(kotlinx.coroutines.android.android)
     implementation(kotlinx.coroutines.core.core)
     // Hilt for DI
-    implementation("com.google.dagger:hilt-android:2.44.2")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:2.46.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.46.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
