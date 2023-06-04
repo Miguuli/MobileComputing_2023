@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-plugins {
-    id("example.jvm.library")
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
 
-dependencies {
-    implementation(libs.kotlinx.datetime)
-}
+rootProject.name = "build-logic"
+include(":convention")

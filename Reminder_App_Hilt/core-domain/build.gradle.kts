@@ -1,54 +1,33 @@
+/*
+ * Copyright 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("example.android.library")
+    id("example.android.library.jacoco")
     kotlin("kapt")
 }
 
 android {
     namespace = "com.example.core.domain"
-    compileSdk = sdk.compile
-
-    defaultConfig {
-        minSdk = sdk.min
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
-    implementation(androidx.core.ktx)
-    implementation(androidx.work.hilt_work)
-    implementation(androidx.work.runtime)
-    implementation(kotlinx.coroutines.android.android)
-    // Hilt for DI
-    implementation("com.google.dagger:hilt-android:2.46.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.46.1")
-    kapt(androidx.work.compiler)
-    annotationProcessor(androidx.work.compiler)
-    implementation(project(":core-model"))
     implementation(project(":core-data"))
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-}
-kotlin{
-    jvmToolchain(17)
+    implementation(project(":core-model"))
+    implementation(libs.hilt.android)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.datetime)
+    kapt(libs.hilt.compiler)
 }

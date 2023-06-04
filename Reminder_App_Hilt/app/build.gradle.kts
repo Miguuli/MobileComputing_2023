@@ -1,50 +1,47 @@
 plugins {
-    id("com.android.application")
-    id("com.google.dagger.hilt.android")
-    kotlin("android")
-    kotlin("kapt")
+    id("example.android.application")
+    id("example.android.application.compose")
+    id("example.android.application.flavors")
+    id("example.android.application.jacoco")
+    id("example.android.hilt")
+    id("jacoco")
 }
 
 android {
-    compileSdk = sdk.compile
-
     defaultConfig {
         applicationId = "com.example.myapplication"
-        
-        minSdk = sdk.min
-        targetSdk = sdk.target
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Custom test runner to set up Hilt dependency graph
         vectorDrawables {
             useSupportLibrary = true
         }
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        debug {
+        }
+        val release by getting {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            // To publish on the Play store a private signing key is required, but to allow anyone
+            // who clones the code to sign and run the release variant, use the debug signing key.
+            // TODO: Abstract the signing configuration to a separate file to avoid hardcoding this.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 
-    buildFeatures {
-        compose = true
-        buildConfig = true
+    packaging {
+        resources {
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+        }
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
     namespace = "com.example.myapplication"
 }
@@ -52,44 +49,31 @@ android {
 dependencies {
     implementation(project(":core-model"))
     implementation(project(":core-domain"))
-    implementation(androidx.core.ktx)
-    implementation(androidx.compose.ui.ui)
-    //implementation(androidx.compose.material)
-    //implementation(androidx.compose.material_icons)
-    //implementation(androidx.compose.ui.preview)
-    implementation(androidx.lifecycle.compose)
-    implementation(androidx.navigation.compose)
-    implementation(androidx.lifecycle.runtime)
-    implementation(androidx.constraintlayout.compose)
-
-    implementation(androidx.navigation.hilt.compose)
-
-    // Hilt for DI
-    implementation("com.google.dagger:hilt-android:2.46.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation(platform("androidx.compose:compose-bom:2023.05.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    //implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material:1.4.3")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.05.01"))
-    kapt("com.google.dagger:hilt-android-compiler:2.46.1")
-    implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.4.3")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.3")
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.ktx)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.compose.runtime.tracing)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
+    api(libs.androidx.compose.foundation)
+    api(libs.androidx.compose.foundation.layout)
+    api(libs.androidx.compose.material)
+    api(libs.androidx.compose.material3)
+    api(libs.androidx.compose.runtime)
+    api(libs.androidx.compose.runtime.livedata)
+    api(libs.androidx.compose.ui.tooling.preview)
+    api(libs.androidx.compose.ui.util)
+    implementation(libs.coil.kt)
 }
 
-kapt {
-    correctErrorTypes = true
-}
-
-kotlin{
-    jvmToolchain(17)
+// androidx.test is forcing JUnit, 4.12. This forces it to use 4.13
+configurations.configureEach {
+    resolutionStrategy {
+        force(libs.junit4)
+        // Temporary workaround for https://issuetracker.google.com/174733673
+        force("org.objenesis:objenesis:2.6")
+    }
 }

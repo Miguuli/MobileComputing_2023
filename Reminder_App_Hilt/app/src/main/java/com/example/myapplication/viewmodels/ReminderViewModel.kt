@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.core.domain.businesslogic.notification.NotificationUseCase
 import com.example.core.domain.businesslogic.reminder.AddReminderUseCase
 import com.example.core.domain.businesslogic.reminder.GetRemindersUseCase
 import com.example.core.model.entity.Reminder
@@ -24,8 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
     private val getRemindersUseCase: GetRemindersUseCase,
-    private val addReminderUseCase: AddReminderUseCase,
-    private val notificationUseCase: NotificationUseCase
+    private val addReminderUseCase: AddReminderUseCase
+   // private val notificationUseCase: NotificationUseCase
 )
 : ViewModel(){
 
@@ -58,7 +57,6 @@ class ReminderViewModel @Inject constructor(
 
     init {
         viewModelScope.launch{
-            notificationUseCase()
             getRemindersUseCase().collect{
               _state.value = it
             }
