@@ -1,4 +1,4 @@
-package com.codemave.core.domain
+package com.example.core.domain
 
 import org.junit.Test
 
