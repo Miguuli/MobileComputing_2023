@@ -17,5 +17,5 @@ rootProject.name = "HiltRoom"
 include(":app")
 include(":core-data")
 include(":core-domain")
-//include(":core-database")
+include(":core-database")
 include(":core-model")

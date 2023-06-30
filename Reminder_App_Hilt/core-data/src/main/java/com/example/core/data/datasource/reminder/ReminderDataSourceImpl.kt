@@ -1,7 +1,7 @@
 package com.example.core.data.datasource.reminder
 
-//import com.example.core.database.dao.ReminderDao
-//import com.example.core.database.entity.ReminderEntity
+import com.example.core.database.dao.ReminderDao
+import com.example.core.database.entity.ReminderEntity
 import com.example.core.model.entity.Reminder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,12 +14,12 @@ import javax.inject.Inject
 import kotlin.Array
 
 class ReminderDataSourceImpl @Inject constructor(
-    //private val reminderDao: ReminderDao
+    private val reminderDao: ReminderDao
 ) : ReminderDataSource {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override suspend fun reminders(): Flow<List<Reminder>> {
-        /*
+
         return reminderDao.reminders().map { list ->
             List(list.size) { index ->
                 Reminder(
@@ -28,14 +28,11 @@ class ReminderDataSourceImpl @Inject constructor(
                 )
             }
         }
-
-         */
-        return flowOf()
     }
 
     override suspend fun addReminder(reminder: Reminder): Long {
         var ret = 0L
-        /*
+
         scope.launch {
 
             ret = when (val local = reminderDao.getReminderWithId(reminder.uid)) {
@@ -48,13 +45,11 @@ class ReminderDataSourceImpl @Inject constructor(
             }
         }
 
-             */
         return ret
     }
 
     override suspend fun editReminder(reminder: Reminder): Long {
         var ret = 0L
-        /*
         scope.launch {
             ret = when(reminderDao.getReminderWithId(reminder.uid)) {
                 null-> ret
@@ -68,13 +63,12 @@ class ReminderDataSourceImpl @Inject constructor(
             }
         }
 
-         */
         return ret
     }
 
     override suspend fun editReminderVisibility(reminder: Reminder): Long {
         var ret = 0L
-        /*
+
         scope.launch {
             ret = when(reminderDao.getReminderWithId(reminder.uid)) {
                 null-> ret
@@ -88,12 +82,11 @@ class ReminderDataSourceImpl @Inject constructor(
             }
         }
 
-         */
         return ret
     }
 
     override suspend fun editAll(enabled: Boolean) {
-        /*
+
         scope.launch {
             reminderDao.reminders().collect {reminders_from_db->
                 reminders_from_db.forEach{reminder_from_db->
@@ -107,13 +100,11 @@ class ReminderDataSourceImpl @Inject constructor(
                 }
             }
         }
-
-         */
     }
 
     override suspend fun deleteReminder(uid: Long): Int {
         var ret = 0
-        /*
+
         scope.launch {
             ret = when (val local = reminderDao.getReminderWithId(uid)) {
                 null-> ret
@@ -123,7 +114,6 @@ class ReminderDataSourceImpl @Inject constructor(
             }
         }
 
-         */
         return ret
     }
 }

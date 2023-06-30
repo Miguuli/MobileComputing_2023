@@ -14,7 +14,7 @@ class GetRemindersUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() = withContext(coroutinecontext){
        repository.reminders().map {
-           ReminderStore(reminders = it, null)
+               ReminderStore(reminders = it, null)
        }
     }
 }
@@ -22,8 +22,29 @@ class GetRemindersUseCase @Inject constructor(
 class AddReminderUseCase @Inject constructor(
     private val coroutinecontext: CoroutineContext,
     private val repository: ReminderRepository) {
+
     suspend operator fun invoke(reminder: Reminder): Long
     = withContext(coroutinecontext){
         repository.addReminder(reminder)
+    }
+}
+
+class EditReminderUseCase @Inject constructor(
+    private val coroutinecontext: CoroutineContext,
+    private val repository: ReminderRepository) {
+
+    suspend operator fun invoke(reminder: Reminder): Long
+    = withContext(coroutinecontext){
+        repository.editReminder(reminder)
+    }
+}
+
+class DeleteReminderUseCase @Inject constructor(
+    private val coroutinecontext: CoroutineContext,
+    private val repository: ReminderRepository) {
+
+    suspend operator fun invoke(uid: Long)
+    = withContext(coroutinecontext){
+        repository.deleteReminder(uid)
     }
 }

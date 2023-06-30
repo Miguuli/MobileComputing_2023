@@ -74,10 +74,10 @@ fun ReminderScreen(
                         reminderTime = time,
                         message_content = content
                     )},
-                onDeleteClick = { uid-> /*viewModel.removeReminder(uid = uid) */},
+                onDeleteClick = { uid-> viewModel.removeReminder(uid = uid) },
                 onEditReminder = {time, content, uid->
-                    /*viewModel.editReminder(time = time,
-                     message_content = content, uid = uid)*/
+                    viewModel.editReminder(time = time,
+                     message_content = content, uid = uid)
                 }
             )
         }
