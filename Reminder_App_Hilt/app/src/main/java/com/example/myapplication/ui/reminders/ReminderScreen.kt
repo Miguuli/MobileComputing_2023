@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.theme.BackIcon
 import com.example.myapplication.theme.screen_modifier
 import com.example.myapplication.viewmodels.ReminderViewModel
+
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun RequestPermission(onPermissionClick: ()-> Unit){
@@ -56,6 +57,7 @@ fun RequestPermission(onPermissionClick: ()-> Unit){
         }
     }
 }
+
 @Composable
 fun ReminderScreen(
     onBackPress: () -> Unit,
@@ -69,7 +71,7 @@ fun ReminderScreen(
         Column( modifier = screen_modifier) {
             MyTopAppBar(onBackClick = onBackPress)
             ReminderModifyScaffold(reminders = viewState.reminders,
-                onAddReminder = { time, content, ->
+                onAddReminder = { time, content ->
                     viewModel.addReminder(
                         reminderTime = time,
                         message_content = content
